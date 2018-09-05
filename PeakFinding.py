@@ -1,0 +1,67 @@
+from __future__ import print_function
+from __future__ import division
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+def vote_peaks(signal, filter_size=21,passes=3,threshold=.7):
+    
+	#define how large of steps need to be taken
+    size = len(signal)
+    
+    # Pad profile so that we can index properly   
+    signal = np.pad(signal,(filter_size+passes,filter_size+passes),'constant', constant_values=(0))
+    
+
+    # create vote holder array
+    votes = np.zeros_like(signal)
+ 
+    # iterate over the array accruing votes for the tallest peaks
+    for j in range(passes):
+
+        # step through the array and vote for peak locations 
+        for i in range(0,size+j):
+            scalar = 1
+            votes[np.argmax(signal[i:i+filter_size+j])+i] += scalar
+        
+        # Pare down the votes to remove extraneous peaks but preserve candidates
+        votes[votes<np.amax(votes)*threshold] = 0        
+
+
+    # trim off the padding from the votes array
+    inner = (filter_size+passes)
+    
+    peak_locs_pixel = votes[inner:-inner]
+
+    return peak_locs_pixel
+
+
+def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):
+    """
+    Inputs:
+        x : vector of bins
+        bin_scale: pixels per bin
+        SIZE: pixel_size in microns/pixel
+        DIST: distance of camera from sample in millimeters
+        WAVE: wave length in nanometers
+    """
+        
+    r = x*SIZE*1e-3 #in millimeters
+    d = DIST * WAVE / r
+    
+
+    theta = np.arcsin((1/(d)))*360/np.pi #radians->degrees*2
+    
+    return theta, d
+
+def plot_peaks(sig,thetas,votes):
+    indicies = np.where(votes>0)
+    plt.figure(figsize=(6,2))
+    
+    plt.plot(thetas,sig,linewidth=3)
+    sig_min = np.amin(sig)
+    for index in indicies[0]:
+        x = np.array([thetas[index],thetas[index]])
+        y = np.array([sig[index],sig_min])
+        plt.plot(x,y,linewidth=2)
+    plt.show()
