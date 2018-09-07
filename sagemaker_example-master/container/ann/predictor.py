@@ -5,18 +5,20 @@ from __future__ import print_function
 import os
 import StringIO
 import flask
-
-import tensorflow as tf
+import json
 import numpy as np
 import pandas as pd
 
 from keras import backend as K
 from keras.models import load_model
-from sklearn.preprocessing import StandardScaler
 
 
 
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+paths_dict = { "1": , "2": ,
+             "3": ,"4":,
+
+            }
 
 
 # A singleton for holding the model. This simply loads the model and holds it.
@@ -31,7 +33,7 @@ class ScoringService(object):
         Get the model object for this instance,
         loading it if it's not already loaded.
         """
-        model_path = os.path.join("s3://diffclass-modelstorage", by)
+        model_path = os.path.join("s3://diffclass-modelstorage", by, model)
 
         if cls.model is None:
             cls.model = load_model(
@@ -77,14 +79,14 @@ def ping():
 
 
 
-def peak2vek(peaks,bins=180):
+def peak2vek(peaks,bins=180,theta_range=90.0):
     """
     converts a list of two thetas into a vector of the appropriate size
     """
     blank = np.zeros(bins)
 
     for peak in peaks:
-        blank[int(peak*90.0/bins)] += 1
+        blank[int(peak*bins/theta_range)] += 1
 
     return blank
 

@@ -4,6 +4,17 @@ from __future__ import division
 import numpy as np
 from matplotlib import pyplot as plt
 
+
+def select_peaks(peaks,low=10,high=90):
+
+    peaks[peaks<low] = -1
+    peaks[peaks>high] = -1
+    print(peaks[peaks!=-1])
+    down_selected = peaks[peaks!=-1]
+
+
+    return down_selected
+
 def vote_peaks(signal, filter_size=21,passes=3,threshold=.7):
     
 	#define how large of steps need to be taken
@@ -34,6 +45,8 @@ def vote_peaks(signal, filter_size=21,passes=3,threshold=.7):
     peak_locs_pixel = votes[inner:-inner]
 
     return peak_locs_pixel
+
+    #return select_peaks(peak_locs_pixel)
 
 
 def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):

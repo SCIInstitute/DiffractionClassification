@@ -4,14 +4,12 @@ from __future__ import division
 
 import ProfileExtraction as pfex #custom library to handle the functions behind Extract_Profile
 import PeakFinding as pfnd #custom library to handle the functions behind Find_Peaks
+import UniversalLoader as uvll #custom library to handle the functions behind UniversalLoader
 
-
-
-import numpy as np
 
 """
 """
-def Load_Image(path):
+def Load_Image(path,get_metadata=False):
     """
     Loads an image and extracts the relevant metadata for the image based in file type
     
@@ -30,9 +28,8 @@ def Load_Image(path):
     NEEDS A BUNCH OF CONDITIONALS TO DETERMINE
     THE NATURE OF THE DATA, BEING IN SOOOOO MANY FORMS
     """
-    valid_filetypes={".tif":tif_extract,
-                    ".png":png_extract,
-                    ".dm3":dm3_extract,
+    valid_filetypes={".tif":uvll.tif_extract,
+                    ".dm3":uvll.dm3_extract,
                     }
     
     file_type = path[-4:]
@@ -41,27 +38,12 @@ def Load_Image(path):
     if file_type in valid_filetypes.keys():
         
         # Call the appropriate extraction function
-        valid_filetypes[file_type](file_type)
+        image_data, calibration  =  valid_filetypes[file_type](path)
 
     else:
 
         raise ValueError("Unsupported file type: please submit a {}".format(valid_filetypes.keys()))
 
-
-
-    # Open the file
-    opened_file = None
-
-    # extract the data
-    image_data = opened_file.image_data #PLACEHOLDER
-    metadata = opened_file.metadata #PLACEHOLDER
-
-    # extract the metadata
-    pixel_size,wavelength,camera_dist = metadata_extract(metadata)
-
-    calibration = { "pixel_size":   float,
-                    "wavelength":   float,
-                    "camera_dist":  float}
 
 
 
@@ -123,7 +105,7 @@ def Find_Peaks(profile,calibration):
     # find the location of the peaks in pixel space    
     peaks_pixel = pfnd.vote_peaks(profile["brightness"])
     
-    print(peaks_pixel[peaks_pixel>0])
+    #print(peaks_pixel[peaks_pixel>0])#DEBUG
 
     # convert pixel locations into d and two_theta positions
     peaks_d, peaks_theta = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
