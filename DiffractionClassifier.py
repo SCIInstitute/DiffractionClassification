@@ -13,7 +13,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 USER_INFO = "user_profile.json"
-URL =  "http://ec2-52-26-77-17.us-west-2.compute.amazonaws.com/" #you'll need me to send you the link
+URL =  #you'll need me to send you the link
 families = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
