@@ -9,13 +9,13 @@ def select_peaks(peaks,low=10,high=90):
 
     peaks[peaks<low] = -1
     peaks[peaks>high] = -1
-    print(peaks[peaks!=-1])
+    
     down_selected = peaks[peaks!=-1]
 
 
     return down_selected
 
-def vote_peaks(signal, filter_size=21,passes=3,threshold=.7):
+def vote_peaks(signal, filter_size=21,passes=3,threshold=.9):
     
 	#define how large of steps need to be taken
     size = len(signal)
@@ -77,4 +77,4 @@ def plot_peaks(sig,thetas,votes):
         x = np.array([thetas[index],thetas[index]])
         y = np.array([sig[index],sig_min])
         plt.plot(x,y,linewidth=2)
-    plt.show()
+    plt.show(block=False)

@@ -29,9 +29,7 @@ def find_center(image,beam_stop=False):
 
         # Extract the nth pixel from the list ordered on intensity.
         center = ordered_points[:,-3][0]
-        print(ordered_points[:,-10:][0])
-        #print(center)
-
+        
 
     return center
 
