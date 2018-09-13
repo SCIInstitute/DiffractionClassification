@@ -112,7 +112,7 @@ def Find_Peaks(profile,calibration):
     peaks_theta, peaks_d = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
         calibration["camera_distance"],calibration["wavelength"])
 
-    peaks_theta=peaks_theta[:3]
+    peaks_theta=peaks_theta[:4]
 
     #POSSIBLY IMPLEMENT CODE TO SHOW THE PEAKS FOUND FOR THE USER
 
@@ -160,10 +160,12 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
         family = requests.post(URL+"predict/family", json=payload).text
         payload['family'] = int_to_fam[family]
         print(family)
+        
     # Once the family is known, predicts the genus
     genus = requests.post(URL+"predict/genera", json=payload).text
     payload['genus'] = genus
     print(genus)
+
     # Once the genera are predicted give the top two from each
     species = requests.post(URL+"predict/species", json=payload).text
     payload['species'] = species

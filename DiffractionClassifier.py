@@ -1,16 +1,10 @@
 import ClientSide #custom package
+
 import argparse
-
-# server communication
 import json
-
-from future.builtins.misc import input
 import os
 
-
-# TESTING IMPORTS
-import numpy as np
-from matplotlib import pyplot as plt
+from future.builtins.misc import input
 
 USER_INFO = "user_profile.json"
 URL =  #you'll need me to send you the link
@@ -21,7 +15,7 @@ def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--filepath', type=str,
                         dest='fpath', help='path to the image',
-                        metavar='FPATH', required=True)
+                        metavar='FPATH',default=None,required=False)
 
     parser.add_argument('--calibration', type=str,
                         dest='calibration', help='path to the calibration json',
@@ -50,6 +44,9 @@ def validate_calibration(prompt,name):
 def main():
     parser = build_parser()
     options = parser.parse_args()
+    if options.fpath is None:
+        print("No path to data provided.\n Please enter filepath to your data")
+        options.fpath = input()
 
     print("loading data from {}".format(options.fpath))    
     image_data, calibration = ClientSide.Load_Image(options.fpath)

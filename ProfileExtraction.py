@@ -52,19 +52,16 @@ def radial_profile(data, center,bins=1):
     """
 
     # Create the indicies array masked array
-
     y,x = np.indices((data.shape)) # first determine radii of all pixels
     
     # Modify the indicies to incorporate pixel distance
     r = np.sqrt((x-center[1])**2+(y-center[0])**2)    
-    print("CENTER",center)#debug
-    #print("AFDSKHADSF",r.shape)#debug
+
     # Radius of the image
     r_max = np.max(r)  
 
     # Evaluate the brightnesses of each ring in the indicies array
     ring_brightness, radius = np.histogram(r, weights=data, bins=int(r_max)//bins)
     
-    #print(ring_brightness.shape)#debug
     return radius[1:], ring_brightness
 

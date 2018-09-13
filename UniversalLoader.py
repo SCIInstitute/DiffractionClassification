@@ -1,17 +1,18 @@
 import dm3_lib as dm3
+import numpy as np
+
 from matplotlib import pyplot as plt
 
-import numpy as np
 
 """
 """
 def ensure_positivity(image):
-
-	minimum = np.amin(image)
-	
-		
+	"""
+	NOT YET IMPLEMENTEDs
+	"""
+	#minimum = np.amin(image)
 	#image -= minimum
-
+	pass
 	
 """
 """
