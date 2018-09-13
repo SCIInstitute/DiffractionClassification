@@ -1,0 +1,7 @@
+#
+######### Requirements without specific versions
+
+requests
+numpy
+matplotlib
+
