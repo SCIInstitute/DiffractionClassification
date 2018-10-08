@@ -1,13 +1,14 @@
 import ClientSide #custom package
 
+import numpy as np
 import argparse
 import json
 import os
-
+from matplotlib import pyplot as plt
 from future.builtins.misc import input
 
 USER_INFO = "user_profile.json"
-URL =  #you'll need me to send you the link
+URL = #you'll need me to send you the link
 families = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -25,6 +26,11 @@ def build_parser():
                         dest='key', help='apikey to securely access service',
                         metavar='KEY', required=False)
 
+    parser.add_argument('--is-profile',
+                    dest='profile', help='set if the data will is an image or a profile',
+                    default=False, action="store_true",required=False)
+
+
     return parser
 
 def validate_calibration(prompt,name):
@@ -40,6 +46,17 @@ def validate_calibration(prompt,name):
         except:
             print("invalid {}".format(name))
 
+def validate_profile_choice(dims):
+
+    if dims[0] > 1:
+        profile_choice = int(input("Multiple profiles detected.\nplease choose which profile to use.\n"))
+        while profile_choice not in range(dims[0]):
+            profile_choice = int(input("Incorrect selection.\nplease choose {}.\n".format(range(dims[0]))))            
+    else:
+        profile_choice = 0
+
+
+    return profile_choice
 
 def main():
     parser = build_parser()
@@ -48,9 +65,27 @@ def main():
         print("No path to data provided.\n Please enter filepath to your data")
         options.fpath = input()
 
-    print("loading data from {}".format(options.fpath))    
+    print("loading data from {}".format(options.fpath))
     image_data, calibration = ClientSide.Load_Image(options.fpath)
     calibrate = options.calibration 
+
+    
+
+    # Change the processing based on data type
+    if options.profile==True:
+        for i in range(image_data.shape[0]):
+            plt.plot(image_data[i,:], label="profile {}".format(i))
+        plt.legend()
+        plt.show(block=False)
+
+        print("The data is a profile.")
+        profile_choice = validate_profile_choice(image_data.shape)
+
+        plt.plot(image_data[profile_choice,:])
+        plt.show(block=False)
+    else:
+        plt.imshow(image_data)
+        plt.show(block=False)
 
     # Load user configuration
     with open(USER_INFO) as f:
@@ -72,8 +107,14 @@ def main():
         with open(calibrate,'r') as f:
             calibration = json.load(f)
 
-    radial_profile = ClientSide.Extract_Profile(image_data)    
+    # Change the Processing based on the type of data
+    if options.profile==True:
+        radial_profile = {"brightness":image_data[profile_choice],
+                            "pixel_range":np.linspace(0,image_data[profile_choice].shape[0],image_data[profile_choice].shape[0])}
+    else:
+        radial_profile = ClientSide.Extract_Profile(image_data)    
 
+    print radial_profile
     peak_locs = ClientSide.Find_Peaks(radial_profile,calibration)
 
     fam = None

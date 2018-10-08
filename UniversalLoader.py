@@ -22,8 +22,14 @@ def tif_extract(filepath):
 	
 	ensure_positivity(image_data)
 	
+	
+	# determine if the data is a profile or a diffraction pattern
+	# NOT YET IMPLEMENTED
+	print(image_data.shape)
+
+
 	# Due to the lack of a universal schema for metatags at the current time
-	# we leave it to the user
+	# we leave it to the user	
 	calibration = None
 
 	return image_data, calibration
@@ -33,8 +39,15 @@ def tif_extract(filepath):
 """
 def dm3_extract(filepath):
 
-	image_data = dm3.DM3(filepath).imagedata
-	ensure_positivity(image_data)
+	dm3_file = dm3.DM3(filepath)
+	#help(dm3_file)
+	#print(dm3_file.__dict__)
+	image_data = dm3_file.imagedata
+
+
+	# determine if the data is a profile or a diffraction pattern
+	# NOT YET IMPLEMENTED
+	print(image_data.shape)
 
 	#print help(image_data)
 	
@@ -43,3 +56,26 @@ def dm3_extract(filepath):
 	calibration = None
 
 	return image_data, calibration
+
+"""
+"""
+def csv_extract(filepath):
+
+	csv_file = np.loadtxt(open(filepath, "rb"), delimiter=",", skiprows=1)
+	#help(dm3_file)
+	#print(dm3_file.__dict__)
+	image_data = csv_file
+
+
+	# determine if the data is a profile or a diffraction pattern
+	# NOT YET IMPLEMENTED
+	print(image_data.shape)
+
+	#print help(image_data)
+	
+	# Due to the lack of a universal schema for metatags at the current time
+	# we leave it to the user
+	calibration = None
+
+	return image_data, calibration
+
