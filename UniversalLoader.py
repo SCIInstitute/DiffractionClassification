@@ -61,16 +61,18 @@ def dm3_extract(filepath):
 """
 def csv_extract(filepath):
 
-	csv_file = np.loadtxt(open(filepath, "rb"), delimiter=",", skiprows=1)
+	csv_file = np.genfromtxt(open(filepath, "rb"), delimiter=",")
 	#help(dm3_file)
 	#print(dm3_file.__dict__)
 	image_data = csv_file
 
-
 	# determine if the data is a profile or a diffraction pattern
 	# NOT YET IMPLEMENTED
 	print(image_data.shape)
-
+	if len(image_data.shape) != 1:
+		if image_data.shape[0] > image_data.shape[1]:
+			image_data = image_data.T
+			print(image_data.shape)
 	#print help(image_data)
 	
 	# Due to the lack of a universal schema for metatags at the current time
