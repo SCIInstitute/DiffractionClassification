@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from future.builtins.misc import input
 
 USER_INFO = "user_profile.json"
-URL = #you'll need me to send you the link
+URL =  #you'll need me to send you the link
 families = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -73,16 +73,25 @@ def main():
 
     # Change the processing based on data type
     if options.profile==True:
-        for i in range(image_data.shape[0]):
-            plt.plot(image_data[i,:], label="profile {}".format(i))
-        plt.legend()
-        plt.show(block=False)
-
         print("The data is a profile.")
-        profile_choice = validate_profile_choice(image_data.shape)
 
-        plt.plot(image_data[profile_choice,:])
-        plt.show(block=False)
+        if len(image_data.shape) == 1:
+            plt.plot(image_data)
+            plt.show(block=False)            
+        else:
+
+            # show the user which profiles are present
+            for i in range(image_data.shape[0]):
+                plt.plot(image_data[i,:], label="profile {}".format(i))
+            plt.legend()
+            plt.show(block=False)
+
+            # have the user select the profile
+            profile_choice = validate_profile_choice(image_data.shape)
+            image_data = image_data[profile_choice]
+            # show chosen profile
+            plt.plot(image_data)
+            plt.show(block=False)
     else:
         plt.imshow(image_data)
         plt.show(block=False)
@@ -96,7 +105,11 @@ def main():
         print("No calibration would be extracted from the file metadata\n Please enter calibration paramters")
         
         pixel_size = validate_calibration("Please enter a pixel size (in angstroms) e.g. 14.1\n","pixel_size")
-        camera_dist = validate_calibration("Please enter camera distance from sample (in millimeters) e.g. 223.1\n","camera distance")
+        if not options.profile:     
+            camera_dist = validate_calibration("Please enter camera distance from sample (in millimeters) e.g. 223.1\n","camera distance")
+        else:
+            camera_dist = 0
+            
         wavelength = validate_calibration("Please enter beam wavelength (in microns) e.g. .02354\n","wavelength")            
 
         calibration = { "pixel_size":   pixel_size,
@@ -109,13 +122,20 @@ def main():
 
     # Change the Processing based on the type of data
     if options.profile==True:
-        radial_profile = {"brightness":image_data[profile_choice],
-                            "pixel_range":np.linspace(0,image_data[profile_choice].shape[0],image_data[profile_choice].shape[0])}
+        radial_profile = {"brightness":image_data,
+                            "pixel_range":np.linspace(0,image_data.shape[0],image_data.shape[0])}
+
     else:
         radial_profile = ClientSide.Extract_Profile(image_data)    
 
-    print radial_profile
-    peak_locs = ClientSide.Find_Peaks(radial_profile,calibration)
+
+
+    peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,options.profile)
+
+    print(peak_locs)
+
+    if len(peak_locs) <= 2:
+        print("WARNING: only {} peaks were detected, this is lower than the recommended 4+ peaks needed\nfor best results. Please check calibration.")
 
     fam = None
     provide_family = None

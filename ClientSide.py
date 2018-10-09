@@ -86,7 +86,7 @@ def Extract_Profile(image_data):
 
 """
 """
-def Find_Peaks(profile,calibration):
+def Find_Peaks(profile,calibration,is_profile=False):
     """
     Pulls out the peaks from a radial profile
 
@@ -101,18 +101,24 @@ def Find_Peaks(profile,calibration):
         peak_locs : list of arrays, two_theta and d_spacings of peaks in the profile
     """
 
+    filter_size=int(profile["pixel_range"].shape[0]/50)
 
     # find the location of the peaks in pixel space    
-    peaks_pixel = pfnd.vote_peaks(profile["brightness"])
+    peaks_pixel = pfnd.vote_peaks(profile["brightness"],filter_size=filter_size)
     
 
     #print(peaks_pixel[peaks_pixel>0])#DEBUG
 
-    # convert pixel locations into d and two_theta positions
-    peaks_theta, peaks_d = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
-        calibration["camera_distance"],calibration["wavelength"])
+    if is_profile:
+        peaks_theta, peaks_d = pfnd.profile2theta(profile["pixel_range"][peaks_pixel>0],
+            calibration['pixel_size'],calibration["wavelength"])
 
-    peaks_theta=peaks_theta[:4]
+    else:
+        # convert pixel locations into d and two_theta positions
+        peaks_theta, peaks_d = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
+            calibration["camera_distance"],calibration["wavelength"])
+
+    peaks_theta=peaks_theta[:5]
 
     #POSSIBLY IMPLEMENT CODE TO SHOW THE PEAKS FOUND FOR THE USER
 

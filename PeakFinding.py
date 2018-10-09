@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-def select_peaks(peaks,low=10,high=90):
+def select_peaks(peaks,low=15,high=90):
 
     peaks[peaks<low] = -1
     peaks[peaks>high] = -1
@@ -15,7 +15,7 @@ def select_peaks(peaks,low=10,high=90):
 
     return down_selected
 
-def vote_peaks(signal, filter_size=21,passes=3,threshold=.9):
+def vote_peaks(signal, filter_size=1,passes=2,threshold=.8):
     
 	#define how large of steps need to be taken
     size = len(signal)
@@ -66,6 +66,19 @@ def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):
     theta = np.arcsin((1/(d)))*360/np.pi #radians->degrees*2
     
     return theta, d
+
+def profile2theta(pixel_profile,SIZE=1e9,WAVE=.15406):
+    id_scale = np.linspace(0.00001,len(pixel_profile),len(pixel_profile))*SIZE
+    print(id_scale)
+    rd_scale = 1/id_scale
+    print(rd_scale)
+    t_scale = d2theta(rd_scale,WAVE)
+    print(t_scale)
+    return t_scale, rd_scale
+
+def d2theta(d,wavelength=.15406):
+    theta_vec = 2 * np.arcsin(wavelength/(d*2)) * 180/np.pi
+    return theta_vec
 
 def plot_peaks(sig,thetas,votes):
     indicies = np.where(votes>0)
