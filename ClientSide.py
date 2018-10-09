@@ -2,6 +2,10 @@ from __future__ import print_function
 from __future__ import division
 
 
+from Notation import SpaceGroupsDict as spgs
+
+SpGr = spgs.spacegroups()
+
 import ProfileExtraction as pfex #custom library to handle the functions behind Extract_Profile
 import PeakFinding as pfnd #custom library to handle the functions behind Find_Peaks
 import UniversalLoader as uvll #custom library to handle the functions behind UniversalLoader
@@ -101,7 +105,7 @@ def Find_Peaks(profile,calibration,is_profile=False):
         peak_locs : list of arrays, two_theta and d_spacings of peaks in the profile
     """
 
-    filter_size=int(profile["pixel_range"].shape[0]/50)
+    filter_size=max(int(profile["pixel_range"].shape[0]/50),3)
 
     # find the location of the peaks in pixel space    
     peaks_pixel = pfnd.vote_peaks(profile["brightness"],filter_size=filter_size)
@@ -157,7 +161,8 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     payload = {'peaks':peak_locations['vec'],
                 'family':fam,
                 'genus':None,
-                'species':None
+                'First Prediction':None,
+                'Second Prediction':None
                 }
 
 
@@ -173,7 +178,11 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     print(genus)
 
     # Once the genera are predicted give the top two from each
-    species = requests.post(URL+"predict/species", json=payload).text
-    payload['species'] = species
+    species = requests.post(URL+"predict/species", json=payload).json()
+    species["prediction1"].insert(0,SpGr.sgs_to_group[str(species["prediction1"][0])])
+    species["prediction2"].insert(0,SpGr.sgs_to_group[str(species["prediction2"][0])])
+        
+    payload['First Prediction'] = species["prediction1"]
+    payload['Second Prediction'] = species["prediction2"]
 
     return payload

@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from future.builtins.misc import input
 
 USER_INFO = "user_profile.json"
-URL =  #you'll need me to send you the link
+URL = #you'll need me to send you the link
 families = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -29,6 +29,10 @@ def build_parser():
     parser.add_argument('--is-profile',
                     dest='profile', help='set if the data will is an image or a profile',
                     default=False, action="store_true",required=False)
+
+    parser.add_argument('--session',
+                        dest='session',help='Keep user preferences for multirun sessions',
+                        metavar='SESSION',required=False, default=None)
 
 
     return parser
@@ -69,7 +73,14 @@ def main():
     image_data, calibration = ClientSide.Load_Image(options.fpath)
     calibrate = options.calibration 
 
-    
+    if options.session:
+        with open(options.session,'r') as f:
+            session = json.load(f)
+        fam = session["crystalfamily"]
+        provide_family = session["known_family"]
+    else:
+        fam = None
+        provide_family = None
 
     # Change the processing based on data type
     if options.profile==True:
@@ -88,6 +99,7 @@ def main():
 
             # have the user select the profile
             profile_choice = validate_profile_choice(image_data.shape)
+            plt.close()
             image_data = image_data[profile_choice]
             # show chosen profile
             plt.plot(image_data)
@@ -109,12 +121,13 @@ def main():
             camera_dist = validate_calibration("Please enter camera distance from sample (in millimeters) e.g. 223.1\n","camera distance")
         else:
             camera_dist = 0
-            
+
         wavelength = validate_calibration("Please enter beam wavelength (in microns) e.g. .02354\n","wavelength")            
 
         calibration = { "pixel_size":   pixel_size,
                 "wavelength":   wavelength,
                 "camera_distance":  camera_dist}
+
     else:
         print("Loading calibration from the specified file")
         with open(calibrate,'r') as f:
@@ -129,7 +142,7 @@ def main():
         radial_profile = ClientSide.Extract_Profile(image_data)    
 
 
-
+    print radial_profile
     peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,options.profile)
 
     print(peak_locs)
@@ -137,8 +150,7 @@ def main():
     if len(peak_locs) <= 2:
         print("WARNING: only {} peaks were detected, this is lower than the recommended 4+ peaks needed\nfor best results. Please check calibration.")
 
-    fam = None
-    provide_family = None
+
     while provide_family is None:
         temp_choice = input("Would you like to suggest a crystal family? yes or no\n")
         if temp_choice =="yes":

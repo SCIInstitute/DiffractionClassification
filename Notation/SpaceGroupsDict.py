@@ -1,3 +1,4 @@
+import os
 class spacegroups:
 	
 	def __init__(self):
@@ -7,7 +8,7 @@ class spacegroups:
 		sgs = []
 		geni = []
 
-		with open("HSGdict.txt", 'r') as proto:
+		with open(os.path.join("Notation","HSGdict.txt"), 'r') as proto:
 			for line in proto.readlines():
 				group, family, sg, genus = line.strip().split('\t')				
 				groups.append(group)
