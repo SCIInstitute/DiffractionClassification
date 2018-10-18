@@ -79,10 +79,7 @@ def Extract_Profile(image_data):
     #Make Radial Profile based on the image dimensions
     pixel_range,brightness = pfex.radial_profile(image_data,center)
 
-    """
-    profile = {"pixel_range":pixel_range,
-                "brightness":brightness}
-    """
+
     return {"pixel_range":pixel_range,
                 "brightness":brightness}
 
@@ -90,7 +87,7 @@ def Extract_Profile(image_data):
 
 """
 """
-def Find_Peaks(profile,calibration,is_profile=False):
+def Find_Peaks(profile,calibration,is_profile=False,display_type="d"):
     """
     Pulls out the peaks from a radial profile
 
@@ -110,9 +107,9 @@ def Find_Peaks(profile,calibration,is_profile=False):
     # find the location of the peaks in pixel space    
     peaks_pixel = pfnd.vote_peaks(profile["brightness"],filter_size=filter_size)
     
-
-    #print(peaks_pixel[peaks_pixel>0])#DEBUG
-
+    scale_t, scale_d = pfnd.pixel2theta(profile["pixel_range"],calibration['pixel_size'],
+                                        calibration["camera_distance"],calibration["wavelength"])
+    
     if is_profile:
         peaks_theta, peaks_d = pfnd.profile2theta(profile["pixel_range"][peaks_pixel>0],
             calibration['pixel_size'],calibration["wavelength"])
@@ -122,17 +119,29 @@ def Find_Peaks(profile,calibration,is_profile=False):
         peaks_theta, peaks_d = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
             calibration["camera_distance"],calibration["wavelength"])
 
-    peaks_theta=peaks_theta[:5]
 
-    #POSSIBLY IMPLEMENT CODE TO SHOW THE PEAKS FOUND FOR THE USER
-
-    peak_locs = {"d_spacing":peaks_d,
+    peak_locs = {"d_spacing":[x for x in peaks_d if x<6 and x >.9],
                 "2theta":[x for x in peaks_theta if x<90 and x >10],
                 "vec":[int(2*x) for x in peaks_theta.tolist() if x < 90 and x > 10]
-}
+        }
+
+    if display_type == "d":
+        pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
+
+    elif display_type == "theta":
+        pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"theta")
+    
+    elif display_type == "both":
+        pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
+        pfnd.plot_peaks(profile['brightness'],scale_t,peaks_pixel,"theta")
+    else:
+        print("Error invalid display_type")
 
 
-    pfnd.plot_peaks(profile['brightness'],profile["pixel_range"],peaks_pixel)
+
+    if len(peak_locs) <= 2:
+        print("WARNING: only {} peaks were detected, this is lower than the recommended 4+ peaks needed\nfor best results. Please check calibration.")
+
 
     return peak_locs
 
@@ -170,7 +179,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     if fam is None:
         family = requests.post(URL+"predict/family", json=payload).text
         payload['family'] = int_to_fam[family]
-        print(family)
+        print(payload["family"])
         
     # Once the family is known, predicts the genus
     genus = requests.post(URL+"predict/genera", json=payload).text

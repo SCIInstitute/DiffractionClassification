@@ -69,25 +69,37 @@ def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):
 
 def profile2theta(pixel_profile,SIZE=1e9,WAVE=.15406):
     id_scale = np.linspace(0.00001,len(pixel_profile),len(pixel_profile))*SIZE
-    print(id_scale)
+    #print(id_scale)
     rd_scale = 1/id_scale
-    print(rd_scale)
+    #print(rd_scale)
     t_scale = d2theta(rd_scale,WAVE)
-    print(t_scale)
+    #print(t_scale)
     return t_scale, rd_scale
 
 def d2theta(d,wavelength=.15406):
     theta_vec = 2 * np.arcsin(wavelength/(d*2)) * 180/np.pi
     return theta_vec
 
-def plot_peaks(sig,thetas,votes):
+def plot_peaks(sig,scale,votes,type):
+
     indicies = np.where(votes>0)
     plt.figure(figsize=(6,2))
-    
-    plt.plot(thetas,sig,linewidth=3)
+    plt.plot(scale,sig,linewidth=3)
     sig_min = np.amin(sig)
+
+    counter = 1
     for index in indicies[0]:
-        x = np.array([thetas[index],thetas[index]])
+        x = np.array([scale[index],scale[index]])
         y = np.array([sig[index],sig_min])
-        plt.plot(x,y,linewidth=2)
+        plt.plot(x,y,linewidth=2,label="peak {}".format(counter))
+        counter += 1 
+    if type == "d":
+        plt.xlim(.5,6)
+        plt.title("d spacing")
+    elif type == "theta":
+        plt.xlim(0,110)
+        plt.title("two theta")
+
+
+    plt.legend()
     plt.show(block=False)
