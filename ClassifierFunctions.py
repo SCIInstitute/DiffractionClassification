@@ -1,3 +1,6 @@
+import csv
+import os
+
 from matplotlib import pyplot as plt
 from future.builtins.misc import input
 
@@ -61,7 +64,7 @@ def choose_profile(image_data):
         plt.show(block=False)
 
         # have the user select the profile
-        profile_choice = cf.validate_profile_choice(image_data.shape)
+        profile_choice = validate_profile_choice(image_data.shape)
         plt.close()
         
         image_data = image_data[profile_choice]
@@ -98,7 +101,7 @@ def choose_peaks(peak_locs,display_type):
 
     maximum = min(len(d),len(theta))
 
-    raw_choices =  input("Choos which peaks you'd like to select separated by spaces.\n").split(" ")
+    raw_choices =  input("Choose which peaks you'd like to select separated by spaces.\n").split(" ")
 
     temp_choices = []
 
@@ -137,3 +140,45 @@ def provide_family():
             print("Invalid choice. Please choose yes or no\n")
 
     return family
+
+
+def write_to_csv(path,data_dict):
+
+    schema = ["file_name","family","genus","genus_confidence","species_1","confidence_1","hall_1",
+    "species_2","confidence_2","hall_2","species_3","confidence_3","hall_3","peaks"]
+
+    # if no file exists create a one and warn the user
+    if not os.path.exists(path):
+        print("creating new output file {}".format(path))
+        with open(path, "wb") as csv_file:
+            filewriter = csv.writer(csv_file, delimiter=",")
+            filewriter.writerow(schema)
+
+    row = []
+
+    row.append(data_dict["file_name"])
+    row.append(data_dict["family"])
+    
+    row.append(data_dict["genus"])
+    row.append(data_dict["genus_confidence"])
+    
+    row.append(data_dict["species_1"])
+    row.append(data_dict["confidence_1"])
+    row.append(data_dict["hall_1"])
+    
+    row.append(data_dict["species_2"])
+    row.append(data_dict["confidence_2"])
+    row.append(data_dict["hall_2"])
+
+    row.append(data_dict["species_3"])
+    row.append(data_dict["confidence_3"])
+    row.append(data_dict["hall_3"])
+
+    row.append(data_dict["peaks"])
+
+    with open(path, "ab") as csv_file:
+        filewriter = csv.writer(csv_file, delimiter=",")
+        filewriter.writerow(row)
+
+
+

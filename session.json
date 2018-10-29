@@ -1,3 +1,9 @@
-{"known_family":"yes",
-"crystalfamily":"tetragonal",
+{"file_path":"test.dm3",
+"auto_calibrate":"calibration.json",
+"manual_peak_selection":false,
+"is_profile":false,
+"output_file":"Results.csv",
+"known_family":"yes",
+"crystal_family":"tetragonal",
+"user_info":"user_info.json",
 "display_type":"both"}

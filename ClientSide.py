@@ -125,6 +125,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d"):
                 "vec":[int(2*x) for x in peaks_theta.tolist() if x < 90 and x > 10]
         }
 
+
     if display_type == "d":
         pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
 
@@ -134,6 +135,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d"):
     elif display_type == "both":
         pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
         pfnd.plot_peaks(profile['brightness'],scale_t,peaks_pixel,"theta")
+
     else:
         print("Error invalid display_type")
 
@@ -170,6 +172,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     payload = {'peaks':peak_locations['vec'],
                 'family':fam,
                 'genus':None,
+                'genus_confidence':0,
                 'First Prediction':None,
                 'Second Prediction':None
                 }
@@ -188,10 +191,30 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
 
     # Once the genera are predicted give the top two from each
     species = requests.post(URL+"predict/species", json=payload).json()
+
+    # formatting the response to be saved more easily
+    # first prediction
+    payload["species_1"]=str(species["prediction1"][0])
+    payload["confidence_1"]=str(species["prediction1"][1])
+    payload["hall_1"]=SpGr.sgs_to_group[str(species["prediction1"][0])]
+    
+    # second prediction
+    payload["species_2"]=str(species["prediction2"][0])
+    payload["confidence_2"]=str(species["prediction2"][1])
+    payload["hall_2"]=SpGr.sgs_to_group[str(species["prediction2"][0])]
+
+    # second prediction  
+    payload["species_3"]=0
+    payload["confidence_3"]=0
+    payload["hall_3"]=0
+    
+
+    """
     species["prediction1"].insert(0,SpGr.sgs_to_group[str(species["prediction1"][0])])
     species["prediction2"].insert(0,SpGr.sgs_to_group[str(species["prediction2"][0])])
         
     payload['First Prediction'] = species["prediction1"]
     payload['Second Prediction'] = species["prediction2"]
+    """
 
     return payload
