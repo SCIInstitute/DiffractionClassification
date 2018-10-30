@@ -103,3 +103,4 @@ def plot_peaks(sig,scale,votes,type):
 
     plt.legend()
     plt.show(block=False)
+

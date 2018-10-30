@@ -70,15 +70,6 @@ def main():
     manual_peak_selection = session["manual_peak_selection"]
 
 
-    # Load Data from specified file (DM3, TIFF, CSV etc....)
-    try:
-
-        print("loading data from {}".format(file_path))
-        image_data, calibration = ClientSide.Load_Image(file_path)
-    except:
-        print("Invalid file path given ({}).\n Please enter filepath to your data".format(file_path))
-        options.fpath = input()
-
     # Load calibration from specified file (json)
     try:
         print("Loading calibration from {}".format(auto_calibrate))  
@@ -87,60 +78,82 @@ def main():
     except:
         print("No calibration could be loaded from {}\nPlease check the file exists and is formatted properly".format(auto_calibrate))
         calibration = cf.set_calibration(options.profsile)
- 
-
-    # Change the processing based on data type
-    if is_profile:
-
-        # Choose which profile if there are multiple
-        image_data = cf.choose_profile(image_data)
-    
-    else:
-        plt.imshow(np.log(image_data))
-        plt.show(block=False)
-        #plt.show()
-
-
+    print(calibration)
     # Load user configuration from provided path
     with open(USER_INFO) as f:
         user_info = json.load(f)
 
-    # Change the Processing based on the type of data
-    if options.profile==True:
-        radial_profile = {"brightness":image_data,
-                            "pixel_range":np.array(range(image_data.shape[0]))}
+    # Determine if the path is a directory or a file
+    if os.path.isdir(file_path):
+        print("loading files from directory")
+        file_paths = []
+        for dirpath,dirnames,fpath in os.walk(file_path):
+            for path in fpath:
+                file_paths.append(os.path.join(dirpath,path))
+        print(file_paths)
 
     else:
-        radial_profile = ClientSide.Extract_Profile(image_data)    
+        file_paths = [file_path]
+
+    print(file_paths)
+    for f_path in file_paths:
+
+        # Load Data from specified file (DM3, TIFF, CSV etc....)
+        try:
+            print("loading data from {}".format(f_path))
+            image_data = ClientSide.Load_Image(f_path)
+        except:
+            print("Invalid file path given ({}).\n Please enter filepath to your data".format(f_path))
+            options.fpath = input()
+
+        # Change the processing based on data type
+        if is_profile:
+
+            # Choose which profile if there are multiple
+            image_data = cf.choose_profile(image_data)
+        
+        else:
+            plt.imshow(np.log(image_data))
+            plt.show(block=False)
+            #plt.show()
+
+        # Change the Processing based on the type of data
+        if options.profile==True:
+            print("identifying from profile")
+            radial_profile = {"brightness":image_data,
+                                "pixel_range":np.array(range(image_data.shape[0]))}
+
+        else:
+            radial_profile = ClientSide.Extract_Profile(image_data)    
+
+        print(radial_profile,calibration,is_profile,display_type)
+        peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type)
 
 
-    peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,options.profile,display_type)
+        
+        # Choose which peaks to classify on
+        if manual_peak_selection:
+            peak_locs = cf.choose_peaks(peak_locs,display_type)
 
 
-    
-    # Choose which peaks to classify on
-    if manual_peak_selection:
-        peak_locs = cf.choose_peaks(peak_locs,display_type)
+        print (peak_locs)
 
+        if provide_family =="yes":
+            while fam is None:
+                temp_fam = input("What family does the Crystal belong to?\n")
+                if temp_fam in FAMILIES:
+                    fam = temp_fam
+                else:
+                    print("Invalid choice. choose from {}\n".format(str(FAMILIES)[1:-1]))
 
-    print (peak_locs)
+        classificated = ClientSide.Send_For_Classification(peak_locs,user_info,URL,fam)  
 
-    if provide_family =="yes":
-        while fam is None:
-            temp_fam = input("What family does the Crystal belong to?\n")
-            if temp_fam in FAMILIES:
-                fam = temp_fam
-            else:
-                print("Invalid choice. choose from {}\n".format(str(FAMILIES)[1:-1]))
+        classificated["file_name"] = f_path
 
-    classificated = ClientSide.Send_For_Classification(peak_locs,user_info,URL,fam)  
+        print(classificated)
 
-    classificated["file_name"] = file_path
-
-    print(classificated)
-
-    # write results out to the specified file
-    cf.write_to_csv(output_file,classificated)
+        # write results out to the specified file
+        cf.write_to_csv(output_file,classificated)
 
 if __name__ == "__main__":
     main()

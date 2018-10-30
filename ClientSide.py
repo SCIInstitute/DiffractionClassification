@@ -42,7 +42,7 @@ def Load_Image(path,get_metadata=False):
     if file_type in valid_filetypes.keys():
         
         # Call the appropriate extraction function
-        image_data, calibration  =  valid_filetypes[file_type](path)
+        image_data =  valid_filetypes[file_type](path)
 
     else:
 
@@ -51,7 +51,7 @@ def Load_Image(path,get_metadata=False):
 
 
 
-    return image_data, calibration
+    return image_data
 
 
 

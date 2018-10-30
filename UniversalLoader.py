@@ -30,9 +30,8 @@ def tif_extract(filepath):
 
 	# Due to the lack of a universal schema for metatags at the current time
 	# we leave it to the user	
-	calibration = None
 
-	return image_data, calibration
+	return image_data
 
 
 """
@@ -53,9 +52,9 @@ def dm3_extract(filepath):
 	
 	# Due to the lack of a universal schema for metatags at the current time
 	# we leave it to the user
-	calibration = None
 
-	return image_data, calibration
+
+	return image_data
 
 """
 """
@@ -77,7 +76,5 @@ def csv_extract(filepath):
 	
 	# Due to the lack of a universal schema for metatags at the current time
 	# we leave it to the user
-	calibration = None
 
-	return image_data, calibration
-
+	return image_data
