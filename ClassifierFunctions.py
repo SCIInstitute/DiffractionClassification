@@ -144,8 +144,11 @@ def provide_family():
 
 def write_to_csv(path,data_dict):
 
-    schema = ["file_name","family","genus","genus_confidence","species_1","confidence_1","hall_1",
-    "species_2","confidence_2","hall_2","species_3","confidence_3","hall_3","peaks"]
+    schema = ["file_name","family","genus","genus_confidence",
+            "species_1","confidence_1","hall_1",
+            "species_2","confidence_2","hall_2",
+            "species_3","confidence_3","hall_3",
+            "species_4","confidence_4","hall_4","peaks"]
 
     # if no file exists create a one and warn the user
     if not os.path.exists(path):
@@ -159,20 +162,24 @@ def write_to_csv(path,data_dict):
     row.append(data_dict["file_name"])
     row.append(data_dict["family"])
     
-    row.append(data_dict["genus"])
-    row.append(data_dict["genus_confidence"])
+    row.append(data_dict["genus_1"])
+    row.append(data_dict["genus_confidence_1"][:5])
     
     row.append(data_dict["species_1"])
-    row.append(data_dict["confidence_1"])
+    row.append(data_dict["confidence_1"][:5])
     row.append(data_dict["hall_1"])
     
     row.append(data_dict["species_2"])
-    row.append(data_dict["confidence_2"])
+    row.append(data_dict["confidence_2"][:5])
     row.append(data_dict["hall_2"])
 
     row.append(data_dict["species_3"])
-    row.append(data_dict["confidence_3"])
+    row.append(data_dict["confidence_3"][:5])
     row.append(data_dict["hall_3"])
+
+    row.append(data_dict["species_4"])
+    row.append(data_dict["confidence_4"][:5])
+    row.append(data_dict["hall_4"])
 
     row.append(data_dict["peaks"])
 

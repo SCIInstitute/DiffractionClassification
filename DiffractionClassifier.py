@@ -13,7 +13,7 @@ from future.builtins.misc import input
     
 
 USER_INFO = "user_profile.json"
-URL = #you'll need me to send you the link
+URL ="http://ec2-34-219-77-112.us-west-2.compute.amazonaws.com/" #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
