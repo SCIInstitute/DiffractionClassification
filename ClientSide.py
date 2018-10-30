@@ -185,8 +185,12 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
         print(payload["family"])
         
     # Once the family is known, predicts the genus
-    genus = requests.post(URL+"predict/genera", json=payload).text
-    payload['genus'] = genus
+    genus = requests.post(URL+"predict/genera", json=payload).json()
+    payload['genus_1'] = genus["genus_1"]
+    payload['genus_confidence_1'] = genus["genus_confidence_1"]
+    payload['genus_2'] = genus["genus_2"]
+    payload['genus_confidence_2'] = genus["genus_confidence_2"]
+    
     print(genus)
 
     # Once the genera are predicted give the top two from each
@@ -195,26 +199,22 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     # formatting the response to be saved more easily
     # first prediction
     payload["species_1"]=str(species["prediction1"][0])
-    payload["confidence_1"]=str(species["prediction1"][1])
+    payload["confidence_1"]=str(float(species["prediction1"][1])*float(genus["genus_confidence_1"]))
     payload["hall_1"]=SpGr.sgs_to_group[str(species["prediction1"][0])]
     
     # second prediction
     payload["species_2"]=str(species["prediction2"][0])
-    payload["confidence_2"]=str(species["prediction2"][1])
+    payload["confidence_2"]=str(float(species["prediction2"][1])*float(genus["genus_confidence_1"]))
     payload["hall_2"]=SpGr.sgs_to_group[str(species["prediction2"][0])]
 
     # second prediction  
-    payload["species_3"]=0
-    payload["confidence_3"]=0
-    payload["hall_3"]=0
+    payload["species_3"]=str(species["prediction3"][0])
+    payload["confidence_3"]=str(float(species["prediction3"][1])*float(genus["genus_confidence_2"]))
+    payload["hall_3"]=SpGr.sgs_to_group[str(species["prediction3"][0])]
     
-
-    """
-    species["prediction1"].insert(0,SpGr.sgs_to_group[str(species["prediction1"][0])])
-    species["prediction2"].insert(0,SpGr.sgs_to_group[str(species["prediction2"][0])])
-        
-    payload['First Prediction'] = species["prediction1"]
-    payload['Second Prediction'] = species["prediction2"]
-    """
+    # second prediction  
+    payload["species_4"]=str(species["prediction4"][0])
+    payload["confidence_4"]=str(float(species["prediction4"][1])*float(genus["genus_confidence_2"]))
+    payload["hall_4"]=SpGr.sgs_to_group[str(species["prediction4"][0])]
 
     return payload
