@@ -3,12 +3,12 @@ import ClientSide #custom package
 import numpy as np
 import argparse
 import json
-import os
-
+import o
+s
 import ClassifierFunctions as cf
 
 from matplotlib import pyplot as plt
-from future.builtins.misc import input
+from builtins import input
 
     
 
@@ -68,7 +68,7 @@ def main():
     output_file = session["output_file"]
     is_profile = session["is_profile"]
     manual_peak_selection = session["manual_peak_selection"]
-
+    scale_bar = session["scale_bar"]
 
     # Load calibration from specified file (json)
     try:
@@ -127,7 +127,7 @@ def main():
             radial_profile = ClientSide.Extract_Profile(image_data)    
 
         print(radial_profile,calibration,is_profile,display_type)
-        peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type)
+        peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type,scale_bar)
 
 
         

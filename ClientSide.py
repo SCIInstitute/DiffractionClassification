@@ -87,7 +87,7 @@ def Extract_Profile(image_data):
 
 """
 """
-def Find_Peaks(profile,calibration,is_profile=False,display_type="d"):
+def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="pixel"):
     """
     Pulls out the peaks from a radial profile
 
@@ -111,8 +111,15 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d"):
                                         calibration["camera_distance"],calibration["wavelength"])
     
     if is_profile:
-        peaks_theta, peaks_d = pfnd.profile2theta(profile["pixel_range"][peaks_pixel>0],
-            calibration['pixel_size'],calibration["wavelength"])
+
+        if scale_bar == "pixel":
+            peaks_theta, peaks_d = pfnd.profile2theta(profile["pixel_range"][peaks_pixel>0],
+                calibration['pixel_size'],calibration["wavelength"])
+        elif scale_bar == "d":
+            peaks_theta, peaks_d = pfnd.d2theta(profile["pixel_range"][peaks_pixel>0],
+                calibration['pixel_size'],calibration["wavelength"])
+        else:
+            print("Invalid scale bar selection. Choose pixel or d")
 
     else:
         # convert pixel locations into d and two_theta positions
