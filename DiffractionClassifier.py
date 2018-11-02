@@ -3,8 +3,7 @@ import ClientSide #custom package
 import numpy as np
 import argparse
 import json
-import o
-s
+import os
 import ClassifierFunctions as cf
 
 from matplotlib import pyplot as plt
@@ -110,7 +109,7 @@ def main():
         if is_profile:
 
             # Choose which profile if there are multiple
-            image_data = cf.choose_profile(image_data)
+            image_data,scale = cf.choose_profile(image_data)
         
         else:
             plt.imshow(np.log(image_data))
@@ -118,15 +117,15 @@ def main():
             #plt.show()
 
         # Change the Processing based on the type of data
-        if options.profile==True:
+        if is_profile:
             print("identifying from profile")
             radial_profile = {"brightness":image_data,
-                                "pixel_range":np.array(range(image_data.shape[0]))}
+                                "pixel_range":scale}
 
         else:
             radial_profile = ClientSide.Extract_Profile(image_data)    
 
-        print(radial_profile,calibration,is_profile,display_type)
+        #print(radial_profile,calibration,is_profile,display_type)
         peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type,scale_bar)
 
 

@@ -107,17 +107,24 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
     # find the location of the peaks in pixel space    
     peaks_pixel = pfnd.vote_peaks(profile["brightness"],filter_size=filter_size)
     
-    scale_t, scale_d = pfnd.pixel2theta(profile["pixel_range"],calibration['pixel_size'],
-                                        calibration["camera_distance"],calibration["wavelength"])
-    
+    print(scale_bar)
     if is_profile:
 
         if scale_bar == "pixel":
             peaks_theta, peaks_d = pfnd.profile2theta(profile["pixel_range"][peaks_pixel>0],
                 calibration['pixel_size'],calibration["wavelength"])
+            scale_t, scale_d = pfnd.pixel2theta(profile["pixel_range"],calibration['pixel_size'],
+                                        calibration["camera_distance"],calibration["wavelength"])
+
         elif scale_bar == "d":
-            peaks_theta, peaks_d = pfnd.d2theta(profile["pixel_range"][peaks_pixel>0],
-                calibration['pixel_size'],calibration["wavelength"])
+            print("It's already in D damnit")
+            peaks_theta = pfnd.d2theta(profile["pixel_range"][peaks_pixel>0],calibration["wavelength"])
+            print(peaks_theta)
+            peaks_d = profile["pixel_range"][peaks_pixel>0]
+            scale_t = pfnd.d2theta(profile["pixel_range"],calibration["wavelength"])
+            scale_d = profile["pixel_range"]
+            print(peaks_d)
+
         else:
             print("Invalid scale bar selection. Choose pixel or d")
 
@@ -125,9 +132,10 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
         # convert pixel locations into d and two_theta positions
         peaks_theta, peaks_d = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
             calibration["camera_distance"],calibration["wavelength"])
+        scale_t, scale_d = pfnd.pixel2theta(profile["pixel_range"],calibration['pixel_size'],
+                                        calibration["camera_distance"],calibration["wavelength"])
 
-
-    peak_locs = {"d_spacing":[x for x in peaks_d if x<6 and x >.9],
+    peak_locs = {"d_spacing":[x for x in peaks_d if x<10 and x >.9],
                 "2theta":[x for x in peaks_theta if x<90 and x >10],
                 "vec":[int(2*x) for x in peaks_theta.tolist() if x < 90 and x > 10]
         }
@@ -189,16 +197,18 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     if fam is None:
         family = requests.post(URL+"predict/family", json=payload).text
         payload['family'] = int_to_fam[family]
-        print(payload["family"])
+        #print(payload["family"])
+
         
     # Once the family is known, predicts the genus
     genus = requests.post(URL+"predict/genera", json=payload).json()
+    
+    #print(genus)
+
     payload['genus_1'] = genus["genus_1"]
     payload['genus_confidence_1'] = genus["genus_confidence_1"]
     payload['genus_2'] = genus["genus_2"]
     payload['genus_confidence_2'] = genus["genus_confidence_2"]
-    
-    print(genus)
 
     # Once the genera are predicted give the top two from each
     species = requests.post(URL+"predict/species", json=payload).json()

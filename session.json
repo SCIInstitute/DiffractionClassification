@@ -1,10 +1,10 @@
-{"file_path":"batch_test",
+{"file_path":"profile_test",
 "auto_calibrate":"calibration.json",
 "manual_peak_selection":false,
-"is_profile":false,
-"output_file":"ResultsTest.csv",
+"is_profile":true,
+"output_file":"ResultsPTest.csv",
 "known_family":"yes",
 "crystal_family":"tetragonal",
 "user_info":"user_info.json",
 "display_type":"both",
-"scale_bar":"pixel"}
+"scale_bar":"d"}

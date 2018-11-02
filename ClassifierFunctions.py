@@ -53,8 +53,18 @@ def choose_profile(image_data):
     print("The data is a profile.")
 
     if len(image_data.shape) == 1:
+    
         plt.plot(image_data)
-        plt.show(block=False)            
+        plt.show(block=False)
+
+        return image_data,np.array(range(image_data.shape[0]))
+    
+    elif len(image_data.shape) == 2:
+        print(image_data[1,:])
+        plt.plot(image_data[1,:])
+        plt.show(block=False)
+
+        return image_data[1,:],image_data[0,:]
 
     else:
         # show the user which profiles are present
@@ -68,10 +78,12 @@ def choose_profile(image_data):
         plt.close()
         
         image_data = image_data[profile_choice]
+        
         # show chosen profile
         plt.plot(image_data)
         plt.show(block=False)
-
+        
+        return image_data
 
 def choose_display():
 
