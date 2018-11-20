@@ -116,10 +116,11 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
             scale_t, scale_d = pfnd.pixel2theta(profile["pixel_range"],calibration['pixel_size'],
                                         calibration["camera_distance"],calibration["wavelength"])
 
+            print(peaks_theta,peaks_d)
         elif scale_bar == "d":
-            print("It's already in D damnit")
+
             peaks_theta = pfnd.d2theta(profile["pixel_range"][peaks_pixel>0],calibration["wavelength"])
-            print(peaks_theta)
+
             peaks_d = profile["pixel_range"][peaks_pixel>0]
             scale_t = pfnd.d2theta(profile["pixel_range"],calibration["wavelength"])
             scale_d = profile["pixel_range"]
@@ -137,7 +138,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
 
     peak_locs = {"d_spacing":[x for x in peaks_d if x<10 and x >.9],
                 "2theta":[x for x in peaks_theta if x<90 and x >10],
-                "vec":[int(2*x) for x in peaks_theta.tolist() if x < 90 and x > 10]
+                "vec":[int(round(2*x)) for x in peaks_theta.tolist() if x < 90 and x > 10]
         }
 
 
@@ -212,6 +213,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
 
     # Once the genera are predicted give the top two from each
     species = requests.post(URL+"predict/species", json=payload).json()
+    print(species)
 
     # formatting the response to be saved more easily
     # first prediction

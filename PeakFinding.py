@@ -68,6 +68,7 @@ def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):
     return theta, d
 
 def profile2theta(pixel_profile,SIZE=1e9,WAVE=.15406):
+    print(SIZE)
     id_scale = np.linspace(0.00001,len(pixel_profile),len(pixel_profile))*SIZE
     #print(id_scale)
     rd_scale = 1/id_scale

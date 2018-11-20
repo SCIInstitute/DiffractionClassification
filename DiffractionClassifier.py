@@ -12,11 +12,11 @@ from builtins import input
     
 
 USER_INFO = "user_profile.json"
-URL = #you'll need me to send you the link
+URL = "http://ec2-34-219-77-112.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
-DEFAULT_SESSION = "session.json"
+DEFAULT_SESSION = os.path.join ("Sessions","session.json")
 
 def build_parser():
 
@@ -71,12 +71,12 @@ def main():
 
     # Load calibration from specified file (json)
     try:
-        print("Loading calibration from {}".format(auto_calibrate))  
-        with open(auto_calibrate,'r') as f:
+        print("Loading calibration from {}".format(os.path.join("Calibrations",auto_calibrate)))  
+        with open(os.path.join("Calibrations",auto_calibrate),'r') as f:
             calibration = json.load(f)
     except:
         print("No calibration could be loaded from {}\nPlease check the file exists and is formatted properly".format(auto_calibrate))
-        calibration = cf.set_calibration(options.profsile)
+        calibration = cf.set_calibration(options.profile)
     print(calibration)
     # Load user configuration from provided path
     with open(USER_INFO) as f:
@@ -152,7 +152,7 @@ def main():
         print(classificated)
 
         # write results out to the specified file
-        cf.write_to_csv(output_file,classificated)
+        cf.write_to_csv(os.path.join("Results",output_file),classificated)
 
 if __name__ == "__main__":
     main()

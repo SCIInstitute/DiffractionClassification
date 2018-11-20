@@ -1,5 +1,6 @@
 import csv
 import os
+import numpy as np 
 
 from matplotlib import pyplot as plt
 from future.builtins.misc import input
@@ -60,11 +61,26 @@ def choose_profile(image_data):
         return image_data,np.array(range(image_data.shape[0]))
     
     elif len(image_data.shape) == 2:
-        print(image_data[1,:])
-        plt.plot(image_data[1,:])
-        plt.show(block=False)
+        if image_data.shape[0] == 1:
+            plt.plot(image_data[0,:])
+            plt.show(block=False)
+            #plt.show()
 
-        return image_data[1,:],image_data[0,:]
+            return image_data[0,:],np.array(range(image_data.shape[1]))
+
+
+        elif image_data.shape[1] == 1:
+            plt.plot(image_data[1,:])
+            plt.show(block=False)
+            #plt.show()
+            return image_data[0,:],np.array(range(image_data.shape[1]))
+
+
+
+        else:
+            ""
+
+            return image_data[1,:],image_data[0,:]
 
     else:
         # show the user which profiles are present
@@ -112,7 +128,7 @@ def choose_peaks(peak_locs,display_type):
         print(theta)
 
     maximum = min(len(d),len(theta))
-
+    print(maximum,len(d),len(theta))
     raw_choices =  input("Choose which peaks you'd like to select separated by spaces.\n").split(" ")
 
     temp_choices = []
@@ -120,7 +136,7 @@ def choose_peaks(peak_locs,display_type):
     for choice in raw_choices:
         try:
             temp_index = int(choice)
-            if temp_index > 0 and temp_index < maximum-1 and temp_index not in temp_choices:
+            if temp_index > 0 and temp_index <= maximum and temp_index not in temp_choices:
                 temp_choices.append(temp_index)
             else:
                 print("index {} outside of available peaks".format(temp_index))
@@ -130,9 +146,9 @@ def choose_peaks(peak_locs,display_type):
     print(temp_choices)
 
     temp_locs = {
-                "d_spacing":[d[i] for i in temp_choices],
-                "2theta":[theta[i] for i in temp_choices],
-                "vec":[vec[i] for i in temp_choices]
+                "d_spacing":[d[i-1] for i in temp_choices],
+                "2theta":[theta[i-1] for i in temp_choices],
+                "vec":[vec[i-1] for i in temp_choices]
                 }
 
     return temp_locs
