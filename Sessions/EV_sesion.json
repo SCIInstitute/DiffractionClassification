@@ -1,0 +1,10 @@
+{"file_path":"ExperimentalValidation",
+"auto_calibrate":"EV.json",
+"manual_peak_selection":true,
+"is_profile":false,
+"output_file":"ResultsEV.csv",
+"known_family":"yes",
+"crystal_family":"cubic",
+"user_info":"user_info.json",
+"display_type":"both",
+"scale_bar":"d"}
