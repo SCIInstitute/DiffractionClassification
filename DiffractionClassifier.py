@@ -12,7 +12,7 @@ from builtins import input
     
 
 USER_INFO = "user_profile.json"
-URL = "http://ec2-34-219-77-112.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+URL = #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -46,18 +46,17 @@ def build_parser():
 def main():
     parser = build_parser()
     options = parser.parse_args()
-
+    print(options.session)
     # opens the user specified session
     if options.session:
-        with open(options.session,'r') as f:
+        with open(os.path.join("Sessions",options.session),'r') as f:
             session = json.load(f)
-
-    # opens the default session    
+        # opens the default session    
     else:
         with open(DEFAULT_SESSION,'r') as f:
 
             session = json.load(f)
-
+    print("a")
     # set session data
     fam = session["crystal_family"]
     provide_family = session["known_family"]
@@ -68,7 +67,7 @@ def main():
     is_profile = session["is_profile"]
     manual_peak_selection = session["manual_peak_selection"]
     scale_bar = session["scale_bar"]
-
+    
     # Load calibration from specified file (json)
     try:
         print("Loading calibration from {}".format(os.path.join("Calibrations",auto_calibrate)))  
@@ -81,7 +80,7 @@ def main():
     # Load user configuration from provided path
     with open(USER_INFO) as f:
         user_info = json.load(f)
-
+    
     # Determine if the path is a directory or a file
     if os.path.isdir(file_path):
         print("loading files from directory")
@@ -93,7 +92,7 @@ def main():
 
     else:
         file_paths = [file_path]
-
+    
     print(file_paths)
     for f_path in file_paths:
 

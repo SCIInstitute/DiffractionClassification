@@ -103,11 +103,11 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
     """
 
     filter_size=max(int(profile["pixel_range"].shape[0]/50),3)
-
+    print(filter_size)
     # find the location of the peaks in pixel space    
     peaks_pixel = pfnd.vote_peaks(profile["brightness"],filter_size=filter_size)
     
-    print(scale_bar)
+    #print(scale_bar)
     if is_profile:
 
         if scale_bar == "pixel":
@@ -141,7 +141,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
                 "vec":[int(round(2*x)) for x in peaks_theta.tolist() if x < 90 and x > 10]
         }
 
-
+    """
     if display_type == "d":
         pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
 
@@ -154,7 +154,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
 
     else:
         print("Error invalid display_type")
-
+    """
 
 
     if len(peak_locs) <= 2:
@@ -202,9 +202,9 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
 
         
     # Once the family is known, predicts the genus
-    genus = requests.post(URL+"predict/genera", json=payload).json()
+    genus = requests.post(URL+"predict/genera", json=payload,timeout=30).json()
     
-    #print(genus)
+    print(genus)
 
     payload['genus_1'] = genus["genus_1"]
     payload['genus_confidence_1'] = genus["genus_confidence_1"]
@@ -212,7 +212,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     payload['genus_confidence_2'] = genus["genus_confidence_2"]
 
     # Once the genera are predicted give the top two from each
-    species = requests.post(URL+"predict/species", json=payload).json()
+    species = requests.post(URL+"predict/species", json=payload,timeout=30).json()
     print(species)
 
     # formatting the response to be saved more easily

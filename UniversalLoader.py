@@ -54,7 +54,7 @@ def dm3_extract(filepath):
 	# we leave it to the user
 
 
-	return image_data
+	return image_data	
 
 """
 """
