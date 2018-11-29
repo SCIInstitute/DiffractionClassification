@@ -34,7 +34,8 @@ def Load_Image(path,get_metadata=False):
     """
     valid_filetypes={".tif":uvll.tif_extract,
                     ".dm3":uvll.dm3_extract,
-                    ".csv":uvll.csv_extract}
+                    ".csv":uvll.csv_extract,
+                    ".txt":uvll.txt_extract}
     
     file_type = path[-4:]
 
