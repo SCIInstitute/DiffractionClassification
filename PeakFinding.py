@@ -4,17 +4,6 @@ from __future__ import division
 import numpy as np
 from matplotlib import pyplot as plt
 
-
-def select_peaks(peaks,low=15,high=90):
-
-    peaks[peaks<low] = -1
-    peaks[peaks>high] = -1
-    
-    down_selected = peaks[peaks!=-1]
-
-
-    return down_selected
-
 def vote_peaks(signal, filter_size=1,passes=2,threshold=.8):
     
 	#define how large of steps need to be taken
@@ -46,10 +35,10 @@ def vote_peaks(signal, filter_size=1,passes=2,threshold=.8):
 
     return peak_locs_pixel
 
-    #return select_peaks(peak_locs_pixel)
 
 
-def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):
+
+def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1.54046):
     """
     Inputs:
         x : vector of bins
@@ -68,20 +57,20 @@ def pixel2theta(x,SIZE=1e-9,DIST=1,WAVE=1):
     return theta, d
 
 def profile2theta(pixel_profile,SIZE=1e9,WAVE=.15406):
-    print(SIZE)
+    
     id_scale = np.linspace(0.00001,len(pixel_profile),len(pixel_profile))*SIZE
-    #print(id_scale)
+    
     rd_scale = 1/id_scale
-    #print(rd_scale)
+    
     t_scale = d2theta(rd_scale,WAVE)
-    #print(t_scale)
+    
     return t_scale, rd_scale
 
 def d2theta(d,wavelength=.15406):
     theta_vec = 2 * np.arcsin(wavelength/(d*2)) * 180/np.pi
     return theta_vec
 
-def plot_peaks(sig,scale,votes,type):
+def plot_peaks(sig,scale,votes,display_type):
 
     indicies = np.where(votes>0)
     plt.figure(figsize=(6,2))
@@ -94,13 +83,14 @@ def plot_peaks(sig,scale,votes,type):
         y = np.array([sig[index],sig_min])
         plt.plot(x,y,linewidth=2,label="peak {}".format(counter))
         counter += 1 
-    if type == "d":
+    
+    if display_type == "d":
         plt.xlim(.5,6)
         plt.title("d spacing")
-    elif type == "theta":
+    elif display_type == "theta":
         plt.xlim(0,110)
         plt.title("two theta")
-
+    
 
     plt.legend()
     plt.show(block=False)

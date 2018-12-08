@@ -178,7 +178,7 @@ def write_to_csv(path,data_dict):
             "species_3","confidence_3","hall_3",
             "species_4","confidence_4","hall_4","peaks"]
 
-    # if no file exists create a one and warn the user
+    # if no file exists create a one and inform the user
     if not os.path.exists(path):
         print("creating new output file {}".format(path))
         with open(path, "wb") as csv_file:

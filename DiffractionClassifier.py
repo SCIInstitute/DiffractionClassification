@@ -11,53 +11,49 @@ from builtins import input
 
     
 
+# Initialize essential global variables
 USER_INFO = "user_profile.json"
-URL = #you'll need me to send you the link
+URL = "http://ec2-54-245-44-75.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
 DEFAULT_SESSION = os.path.join ("Sessions","session.json")
 
-def build_parser():
 
+def build_parser():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--filepath', type=str,
-                        dest='fpath', help='path to the image',
-                        metavar='FPATH',default=None,required=False)
-
+    # This will be implemented as rollout broadens
     parser.add_argument('--apikey', type=str,
                         dest='key', help='api key to securely access service',
                         metavar='KEY', required=False)
 
-    parser.add_argument('--is-profile',
-                    dest='profile', help='set if the data will is an image or a profile',
-                    default=False, action="store_true",required=False)
-
     parser.add_argument('--session',
                         dest='session',help='Keep user preferences for multirun sessions',
                         metavar='SESSION',required=False, default=None)
-
-
     return parser
 
 
 
 def main():
+
     parser = build_parser()
     options = parser.parse_args()
+
     print(options.session)
+
     # opens the user specified session
     if options.session:
         with open(os.path.join("Sessions",options.session),'r') as f:
             session = json.load(f)
-        # opens the default session    
+
+    # opens the default session    
     else:
         with open(DEFAULT_SESSION,'r') as f:
 
             session = json.load(f)
-    print("a")
-    # set session data
+
+    # set variables from loaded session data
     fam = session["crystal_family"]
     provide_family = session["known_family"]
     display_type = session["display_type"]
@@ -73,11 +69,16 @@ def main():
         print("Loading calibration from {}".format(os.path.join("Calibrations",auto_calibrate)))  
         with open(os.path.join("Calibrations",auto_calibrate),'r') as f:
             calibration = json.load(f)
+
+            
+
     except:
         print("No calibration could be loaded from {}\nPlease check the file exists and is formatted properly".format(auto_calibrate))
-        calibration = cf.set_calibration(options.profile)
+        calibration = cf.set_calibration(is_profile)
     print(calibration)
-    # Load user configuration from provided path
+
+
+    # Load user from provided path, [IN PROGRESS]
     with open(USER_INFO) as f:
         user_info = json.load(f)
     
@@ -88,7 +89,7 @@ def main():
         for dirpath,dirnames,fpath in os.walk(file_path):
             for path in fpath:
                 file_paths.append(os.path.join(dirpath,path))
-        print(file_paths)
+        print("found {} files to load.".format(len(file_paths)))
 
     else:
         file_paths = [file_path]
@@ -100,6 +101,7 @@ def main():
         try:
             print("loading data from {}".format(f_path))
             image_data = ClientSide.Load_Image(f_path)
+            print("I successfully loaded the data")
         except:
             print("Invalid file path given ({}).\n Please enter filepath to your data".format(f_path))
             options.fpath = input()
@@ -124,6 +126,7 @@ def main():
         else:
             radial_profile = ClientSide.Extract_Profile(image_data)    
 
+        print(radial_profile)
         #print(radial_profile,calibration,is_profile,display_type)
         peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type,scale_bar)
 

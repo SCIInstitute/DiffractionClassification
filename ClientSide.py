@@ -47,7 +47,7 @@ def Load_Image(path,get_metadata=False):
 
     else:
 
-        raise ValueError("Unsupported file type: please submit a {}".format(valid_filetypes.keys()))
+        raise ValueError("Unsupported file type: please use a {}".format(valid_filetypes.keys()))
 
 
 
@@ -95,20 +95,28 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
 
     Inputs:
 
-        profile  : np.array, the azimuthally integrated 2D diffraction pattern in pixel space.
+        profile     : dictionary, contains intensity profile and scale of
+                                  diffraction pattern
+        calibration : dictionary, contains camera parameters to scale data
+                                 properly in two theta space
+        is_profile  : boolean, changes processing for profiles vs 2D patterns 
+        scale_bar   : string, determines which conversions need to be run  
+                            to convert to two theta
+        display_type: string, determines which plots to show
 
 
     Outputs:
 
-        peak_locs : list of arrays, two_theta and d_spacings of peaks in the profile
+        peak_locs : dictionary, contains two_theta, d_spacings, and input_vector arrays
+                            peaks locations found in the profile
+    
     """
 
     filter_size=max(int(profile["pixel_range"].shape[0]/50),3)
-    print(filter_size)
+    
     # find the location of the peaks in pixel space    
     peaks_pixel = pfnd.vote_peaks(profile["brightness"],filter_size=filter_size)
     
-    #print(scale_bar)
     if is_profile:
 
         if scale_bar == "pixel":
@@ -118,6 +126,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
                                         calibration["camera_distance"],calibration["wavelength"])
 
             print(peaks_theta,peaks_d)
+
         elif scale_bar == "d":
 
             peaks_theta = pfnd.d2theta(profile["pixel_range"][peaks_pixel>0],calibration["wavelength"])
@@ -125,12 +134,18 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
             peaks_d = profile["pixel_range"][peaks_pixel>0]
             scale_t = pfnd.d2theta(profile["pixel_range"],calibration["wavelength"])
             scale_d = profile["pixel_range"]
+            
             print(peaks_d)
+
+        elif scale_bar =="theta":
+
+            peaks_theta = peaks_pixel[]
 
         else:
             print("Invalid scale bar selection. Choose pixel or d")
 
     else:
+
         # convert pixel locations into d and two_theta positions
         peaks_theta, peaks_d = pfnd.pixel2theta(profile["pixel_range"][peaks_pixel>0],calibration['pixel_size'],
             calibration["camera_distance"],calibration["wavelength"])
@@ -142,7 +157,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
                 "vec":[int(round(2*x)) for x in peaks_theta.tolist() if x < 90 and x > 10]
         }
 
-    """
+    # Display the data on the selected scale bar
     if display_type == "d":
         pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
 
@@ -152,10 +167,10 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
     elif display_type == "both":
         pfnd.plot_peaks(profile['brightness'],scale_d,peaks_pixel,"d")
         pfnd.plot_peaks(profile['brightness'],scale_t,peaks_pixel,"theta")
-
+    elif display_type == "none":
+        pass
     else:
         print("Error invalid display_type")
-    """
 
 
     if len(peak_locs) <= 2:
@@ -164,19 +179,27 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
 
     return peak_locs
 
-"""
-"""
+
 def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     """
-    Input:
+    Input: 
+
+        peak_locs : dictionary, contains two_theta, d_spacings, and input_vector arrays
+                    peaks locations found in the profile 
+
+        user_info : dictionary, contains user profile information for tracking 
+                    and security purposes
 
     Outputs:
+
+        payload : dictionary, contains classification statistics and predictions
     
     Calls:
 
-        POST(CLASSIFICATION_ENDPOINT):     
+        POST(CLASSIFICATION_ENDPOINT): sends peak locations to the server for classification    
 
     """
+
     int_to_fam = {"0":"triclinic",
                   "1":"monoclinic",
                   "2":"orthorhombic",
@@ -195,12 +218,11 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
                 }
 
 
-    # if no family is provided then it tries to predict the family
+    # If no family is provided then it tries to predict the family
     if fam is None:
         family = requests.post(URL+"predict/family", json=payload).text
         payload['family'] = int_to_fam[family]
-        #print(payload["family"])
-
+        
         
     # Once the family is known, predicts the genus
     genus = requests.post(URL+"predict/genera", json=payload,timeout=30).json()
@@ -216,23 +238,24 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     species = requests.post(URL+"predict/species", json=payload,timeout=30).json()
     print(species)
 
-    # formatting the response to be saved more easily
-    # first prediction
+    # Formatting the response to be saved more easily
+
+    # First prediction
     payload["species_1"]=str(species["prediction1"][0])
     payload["confidence_1"]=str(float(species["prediction1"][1])*float(genus["genus_confidence_1"]))
     payload["hall_1"]=SpGr.sgs_to_group[str(species["prediction1"][0])]
     
-    # second prediction
+    # Second prediction
     payload["species_2"]=str(species["prediction2"][0])
     payload["confidence_2"]=str(float(species["prediction2"][1])*float(genus["genus_confidence_1"]))
     payload["hall_2"]=SpGr.sgs_to_group[str(species["prediction2"][0])]
 
-    # second prediction  
+    # Third prediction  
     payload["species_3"]=str(species["prediction3"][0])
     payload["confidence_3"]=str(float(species["prediction3"][1])*float(genus["genus_confidence_2"]))
     payload["hall_3"]=SpGr.sgs_to_group[str(species["prediction3"][0])]
     
-    # second prediction  
+    # Fourth prediction  
     payload["species_4"]=str(species["prediction4"][0])
     payload["confidence_4"]=str(float(species["prediction4"][1])*float(genus["genus_confidence_2"]))
     payload["hall_4"]=SpGr.sgs_to_group[str(species["prediction4"][0])]
