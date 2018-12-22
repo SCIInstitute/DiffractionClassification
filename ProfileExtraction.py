@@ -16,7 +16,7 @@ def find_center(image,beam_stop=False):
 
     Outputs:
 
-        x,y: integers,  the index coordinates of the central peak
+        center: tuple(x,y),  the index coordinates of the central peak
 
     """
 
@@ -33,8 +33,7 @@ def find_center(image,beam_stop=False):
 
     return center
 
-"""
-"""
+
 def radial_profile(data, center,bins=1):
     """
     Create the azimuthal integration from the data

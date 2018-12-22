@@ -7,6 +7,10 @@ from future.builtins.misc import input
 
 
 def validate_calibration(prompt,name):
+    """
+    ensures proper options are chosen for calibration    
+    """
+    
     while True:
         temp_value = input(prompt)
         try:
@@ -20,6 +24,10 @@ def validate_calibration(prompt,name):
             print("invalid {}".format(name))
 
 def validate_profile_choice(dims):
+    """
+    ensure proper options are chosen for selecting a single profile 
+
+    """
 
     if dims[0] > 1:
         profile_choice = int(input("Multiple profiles detected.\nplease choose which profile to use.\n"))
@@ -33,6 +41,10 @@ def validate_profile_choice(dims):
 
 
 def set_calibration(is_profile):
+    """
+    prompt user to fill in proper calibration parameters
+    """
+
 
     print("No calibration could be extracted from the file metadata\n Please enter calibration paramters")
     
@@ -50,7 +62,9 @@ def set_calibration(is_profile):
             "camera_distance":  camera_dist}
 
 def choose_profile(image_data):
-
+    """
+    prompts user to select a profile if multiple are detected
+    """
     print("The data is a profile.")
 
     if len(image_data.shape) == 1:
@@ -102,6 +116,9 @@ def choose_profile(image_data):
         return image_data
 
 def choose_display():
+    """
+    prompt user to choose scale bar display
+    """
 
     choices = ["d","theta","both"]
 
@@ -116,7 +133,9 @@ def choose_display():
 
 
 def choose_peaks(peak_locs,display_type):
-
+    """
+    prompt user to select which peaks to classify on
+    """
     d = peak_locs["d_spacing"]
     theta = peak_locs["2theta"]
     vec = peak_locs["vec"]
@@ -154,6 +173,9 @@ def choose_peaks(peak_locs,display_type):
     return temp_locs
 
 def provide_family():
+    """
+    prompt user and ensure proper selection of base Crystal family
+    """
 
     family = None
 
@@ -171,6 +193,10 @@ def provide_family():
 
 
 def write_to_csv(path,data_dict):
+    """
+    save new row of results to csv
+    """
+
 
     schema = ["file_name","family","genus","genus_confidence",
             "species_1","confidence_1","hall_1",

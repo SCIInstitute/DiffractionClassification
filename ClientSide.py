@@ -11,8 +11,7 @@ import PeakFinding as pfnd #custom library to handle the functions behind Find_P
 import UniversalLoader as uvll #custom library to handle the functions behind UniversalLoader
 import requests
 
-"""
-"""
+
 def Load_Image(path,get_metadata=False):
     """
     Loads an image and extracts the relevant metadata for the image based in file type
@@ -55,9 +54,6 @@ def Load_Image(path,get_metadata=False):
     return image_data
 
 
-
-"""
-"""
 def Extract_Profile(image_data):
     """
     Azimuthally integrates a 2D diffraction pattern
@@ -65,12 +61,12 @@ def Extract_Profile(image_data):
     Inputs:
        
        image_data  : np.array, the array of values in the image
-       calibration : dictionary, the essential metadata to convert from pixels to two_theta space
 
     Outputs:
     
 
-        1Dsignal: np.array, the array of values in the in pixel space
+        profile: dictionary, contains intensity profile and pixel scale of
+                                diffraction pattern
 
     """
 
@@ -95,7 +91,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
 
     Inputs:
 
-        profile     : dictionary, contains intensity profile and scale of
+        profile     : dictionary, contains intensity profile and pixel scale of
                                   diffraction pattern
         calibration : dictionary, contains camera parameters to scale data
                                  properly in two theta space
@@ -196,7 +192,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     
     Calls:
 
-        POST(CLASSIFICATION_ENDPOINT): sends peak locations to the server for classification    
+        URL: POST, sends peak locations to the server for classification    
 
     """
 

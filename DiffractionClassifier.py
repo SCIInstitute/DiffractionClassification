@@ -13,7 +13,7 @@ from builtins import input
 
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
-URL = "http://ec2-54-245-44-75.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+URL = #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -126,8 +126,7 @@ def main():
         else:
             radial_profile = ClientSide.Extract_Profile(image_data)    
 
-        print(radial_profile)
-        #print(radial_profile,calibration,is_profile,display_type)
+
         peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type,scale_bar)
 
 
@@ -137,9 +136,8 @@ def main():
             peak_locs = cf.choose_peaks(peak_locs,display_type)
 
 
-        print (peak_locs)
-
         if provide_family =="yes":
+
             while fam is None:
                 temp_fam = input("What family does the Crystal belong to?\n")
                 if temp_fam in FAMILIES:
@@ -151,6 +149,7 @@ def main():
 
         classificated["file_name"] = f_path
 
+        # update the user on the results before saving
         print(classificated)
 
         # write results out to the specified file
