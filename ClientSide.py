@@ -135,7 +135,7 @@ def Find_Peaks(profile,calibration,is_profile=False,display_type="d",scale_bar="
 
         elif scale_bar =="theta":
 
-            peaks_theta = peaks_pixel[]
+            peaks_theta = peaks_pixel
 
         else:
             print("Invalid scale bar selection. Choose pixel or d")

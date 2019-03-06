@@ -133,7 +133,7 @@ def plot_peaks(signal,scale,votes,display_type):
     counter = 1
     for index in indicies[0]:
         x = np.array([scale[index],scale[index]])
-        y = np.array([sig[index],sig_min])
+        y = np.array([signal[index],sig_min])
         plt.plot(x,y,linewidth=2,label="peak {}".format(counter))
         counter += 1 
     
