@@ -1,19 +1,24 @@
-import ClientSide #custom package
+import ClientSide as ClientSide #custom package
 
 import numpy as np
 import argparse
 import json
 import os
 import ClassifierFunctions as cf
-
+import csv
 from matplotlib import pyplot as plt
 from builtins import input
 
-    
+from Notation import SpaceGroupsDict as spgs
+SpGr = spgs.spacegroups()
+
+from itertools import combinations,chain
+
+
 
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
-URL = "http://ec2-35-162-10-63.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+URL = #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -34,6 +39,75 @@ def build_parser():
     return parser
 
 
+def powerset(iterable):
+   "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+   s = list(iterable)
+   return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+    
+def write_to_csv(path,data_dict):
+    schema = ["file_name","family","genus","genus_confidence",
+           "species_1","confidence_1","hall_1",
+           "species_2","confidence_2","hall_2",
+           "species_3","confidence_3","hall_3",
+           "species_4","confidence_4","hall_4","peaks"]    # if no file exists create a one and warn the user
+    if not os.path.exists(path):
+        print("creating new output file {}".format(path))
+        with open(path, "wb") as csv_file:
+            filewriter = csv.writer(csv_file, delimiter=",")
+            filewriter.writerow(schema)
+
+    row = []
+    row.append(data_dict["file_name"])
+    row.append(data_dict["family"])
+
+    row.append(data_dict["genus_1"])
+    row.append(data_dict["genus_confidence_1"][:5])
+
+    row.append(data_dict["species_1"])
+    row.append(data_dict["confidence_1"][:5])
+    row.append(data_dict["hall_1"])
+
+    row.append(data_dict["species_2"])
+    row.append(data_dict["confidence_2"][:5])
+    row.append(data_dict["hall_2"])
+
+    row.append(data_dict["species_3"])
+    row.append(data_dict["confidence_3"][:5])
+    row.append(data_dict["hall_3"])
+
+    row.append(data_dict["species_4"])
+    row.append(data_dict["confidence_4"][:5])
+    row.append(data_dict["hall_4"])
+
+    row.append(data_dict["peaks"])
+
+    with open(path, "ab") as csv_file:
+        filewriter = csv.writer(csv_file, delimiter=",")
+        filewriter.writerow(row)
+
+def combination_peaks(peak_batch,temp_name,user_info,URL,fam):
+    outpath = "Ready"
+    find_valid_peaks = list(powerset(peak_batch["vec"]))
+    find_valid_peaks = [item for item in find_valid_peaks if len(item) > 2 and len(item) < 6]
+    print(len(find_valid_peaks),"valid peak combinations")
+
+    valid_peaks_combinations = [{"vec":proto_combo} for proto_combo in find_valid_peaks]
+    found = False
+    threshold = 0
+    common_peaks = []
+    #peak_locs,user_info,URL,fam
+    
+    for combo in valid_peaks_combinations:
+        classificated = ClientSide.Send_For_Classification(combo,user_info,URL,fam)
+        print(classificated)
+        classificated["file_name"] = temp_name 
+        write_to_csv(os.path.join(outpath,temp_name)+".csv",classificated)
+
+        common_peaks.append(classificated["species_1"])
+        common_peaks.append(classificated["species_2"])
+        common_peaks.append(classificated["species_3"])
+        common_peaks.append(classificated["species_4"])
+    return common_peaks
 
 def main():
 
@@ -111,8 +185,9 @@ def main():
             image_data,scale = cf.choose_profile(image_data)
         
         else:
-            plt.imshow(np.log(image_data))
-            plt.show(block=False)
+            pass
+            #plt.imshow(np.log(image_data))
+            #plt.show(block=False)
             #plt.show()
 
         # Change the Processing based on the type of data
@@ -124,9 +199,9 @@ def main():
         else:
             radial_profile = ClientSide.Extract_Profile(image_data)    
 
-
+       
         peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type,scale_bar)
-
+        print(peak_locs)
 
         
         # Choose which peaks to classify on
@@ -143,15 +218,23 @@ def main():
                 else:
                     print("Invalid choice. choose from {}\n".format(str(FAMILIES)[1:-1]))
 
-        classificated = ClientSide.Send_For_Classification(peak_locs,user_info,URL,fam)  
+        print(peak_locs)
 
-        classificated["file_name"] = f_path
+        with open(os.path.join("Ready",f_path.split(os.sep)[-1][:-4]+".json"), "w") as o:
+            o.write(json.dumps(peak_locs))                
+        
+        lower_gen = SpGr.edges["genus"][fam][0]
+        upper_gen = SpGr.edges["genus"][fam][1]
+        fam_range = range(SpGr.edges["species"][lower_gen][0],1+SpGr.edges["species"][upper_gen][1])
+        
+        common_peaks = combination_peaks(peak_locs,f_path.split(os.sep)[-1][:-4],user_info,URL,fam)
+        histo = np.histogram(common_peaks,bins=fam_range)
+        plt.figure(figsize=(len(fam_range)//2,4))
+        plt.bar(histo[1][:-1],histo[0],align="center")
+        plt.gca().set_xticks(histo[1][:-1])
+        plt.savefig()
+        plt.show(block=False)
 
-        # update the user on the results before saving
-        print(classificated)
-
-        # write results out to the specified file
-        cf.write_to_csv(os.path.join("Results",output_file),classificated)
 
 if __name__ == "__main__":
     main()

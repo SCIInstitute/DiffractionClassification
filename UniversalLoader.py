@@ -86,7 +86,7 @@ def csv_extract(filepath):
 	# Due to the lack of a universal schema for metatags at the current time
 	# we leave it to the user to proscribe the relevant calibrations
 
-	return image_data
+	return profile_data
 
 def txt_extract(filepath):
 	"""
