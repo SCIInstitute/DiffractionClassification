@@ -125,7 +125,8 @@ def combination_peaks(peak_batch,temp_name,user_info,URL,fam):
                 
                 # remove the classified combination
                 failed_combos.remove(combo)
-
+            except KeyboardInterrupt:
+                raise
             except:
                 print("An error occured this combination was not classified.\nIt will be retried {} more times".format(LIMIT-persistance))
 
@@ -253,7 +254,7 @@ def main():
             
         print(peak_locs)
 
-        with open(os.path.join("Ready",f_path.split(os.sep)[-1][:-4]+".json"), "w") as o:
+        with open(os.path.join("Results",f_path.split(os.sep)[-1][:-4]+".json"), "w") as o:
             o.write(json.dumps(peak_locs))                
         
         lower_gen = SpGr.edges["genus"][fam][0]
@@ -268,20 +269,22 @@ def main():
 
         for rank in range(1,5):
             histo = np.histogram(guesses["species_{}".format(rank)],bins=fam_range)
-
+            #histo[0] = histo[0]*(2-(rank/5.0))
+           
             if rank > 1:
                 plot = plt.bar(histo[1][:-1],histo[0],
                     bottom=np.sum(np.vstack(prev_histograms),axis=0),align="center")
             else:
-                plot = plt.bar(histo[1][:-1],histo[0],align="center")
+                plot = plt.bar(histo[1][:-1],histo[0],align="center",color='red')
 
             plots.append(plot)
-            plt.gca().set_xticks(histo[1][:-1])
+            plt.yticks(rotation='vertical')
+            plt.xticks(histo[1][:-1],rotation='vertical')
             prev_histograms.append(histo[0])
-            
-        plt.xlabel("Prediction",fontsize=10)
+
+        plt.xlabel("Prediction",fontsize=10,rotation='vertical')
         plt.ylabel("Counts",fontsize=10)
-        plt.legend(plots,("species_1","species_2","species_3","species_4")) 
+        #plt.legend(plots,("species_1","species_2","species_3","species_4")) 
         plt.savefig(f_path.split(os.sep)[-1][:-4]+".png")
         plt.show(block=False)
 
