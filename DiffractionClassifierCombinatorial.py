@@ -262,21 +262,26 @@ def main():
         
         common_peaks,guesses = combination_peaks(peak_locs,f_path.split(os.sep)[-1][:-4],user_info,URL,fam)
         
-
         plt.figure(figsize=(len(fam_range)//2,4))
         prev_histograms = []
+        plots = []
+
         for rank in range(1,5):
             histo = np.histogram(guesses["species_{}".format(rank)],bins=fam_range)
 
             if rank > 1:
-                plt.bar(histo[1][:-1],histo[0],
+                plot = plt.bar(histo[1][:-1],histo[0],
                     bottom=np.sum(np.vstack(prev_histograms),axis=0),align="center")
             else:
-                plt.bar(histo[1][:-1],histo[0],align="center")
-            
+                plot = plt.bar(histo[1][:-1],histo[0],align="center")
+
+            plots.append(plot)
             plt.gca().set_xticks(histo[1][:-1])
             prev_histograms.append(histo[0])
             
+        plt.xlabel("Prediction",fontsize=10)
+        plt.ylabel("Counts",fontsize=10)
+        plt.legend(plots,("species_1","species_2","species_3","species_4")) 
         plt.savefig(f_path.split(os.sep)[-1][:-4]+".png")
         plt.show(block=False)
 

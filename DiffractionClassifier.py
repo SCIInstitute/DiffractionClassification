@@ -127,8 +127,6 @@ def main():
 
         peak_locs = ClientSide.Find_Peaks(radial_profile,calibration,is_profile,display_type,scale_bar)
 
-
-        
         # Choose which peaks to classify on
         if manual_peak_selection:
             peak_locs = cf.choose_peaks(peak_locs,display_type)
@@ -142,7 +140,9 @@ def main():
                     fam = temp_fam
                 else:
                     print("Invalid choice. choose from {}\n".format(str(FAMILIES)[1:-1]))
-
+        elif provide_family =="no":
+            fam = None
+            
         classificated = ClientSide.Send_For_Classification(peak_locs,user_info,URL,fam)  
 
         classificated["file_name"] = f_path
