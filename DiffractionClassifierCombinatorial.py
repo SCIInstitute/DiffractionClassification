@@ -94,20 +94,47 @@ def combination_peaks(peak_batch,temp_name,user_info,URL,fam):
     valid_peaks_combinations = [{"vec":proto_combo} for proto_combo in find_valid_peaks]
     found = False
     threshold = 0
-    common_peaks = []
-    #peak_locs,user_info,URL,fam
-    
-    for combo in valid_peaks_combinations:
-        classificated = ClientSide.Send_For_Classification(combo,user_info,URL,fam)
-        print(classificated)
-        classificated["file_name"] = temp_name 
-        write_to_csv(os.path.join(outpath,temp_name)+".csv",classificated)
+    guesses = {"species_1":[],
+                "species_2":[],
+                "species_3":[],
+                "species_4":[]}
 
-        common_peaks.append(classificated["species_1"])
-        common_peaks.append(classificated["species_2"])
-        common_peaks.append(classificated["species_3"])
-        common_peaks.append(classificated["species_4"])
-    return common_peaks
+    common_peaks = []
+    failed_combos = valid_peaks_combinations
+    #peak_locs,user_info,URL,fam
+    persistance = 0
+    LIMIT = 3
+
+    while len(failed_combos) > 0 and persistance < LIMIT:
+        for combo in failed_combos:
+            try:
+                classificated = ClientSide.Send_For_Classification(combo,user_info,URL,fam)
+                print(classificated)
+                classificated["file_name"] = temp_name 
+                write_to_csv(os.path.join(outpath,temp_name)+".csv",classificated)
+
+                guesses['species_1'].append(classificated["species_1"])
+                guesses['species_2'].append(classificated["species_2"])
+                guesses['species_3'].append(classificated["species_3"])
+                guesses['species_4'].append(classificated["species_4"])
+                
+                common_peaks.append(classificated["species_1"])
+                common_peaks.append(classificated["species_2"])
+                common_peaks.append(classificated["species_3"])
+                common_peaks.append(classificated["species_4"])
+                
+                # remove the classified combination
+                failed_combos.remove(combo)
+
+            except:
+                print("An error occured this combination was not classified.\nIt will be retried {} more times".format(LIMIT-persistance))
+
+        persistance += 1
+
+    if len(failed_combos)>0:
+        print("there were {} failed combinations".format(len(failed_combos)))
+
+    return common_peaks, guesses
 
 def main():
 
@@ -154,6 +181,10 @@ def main():
     with open(USER_INFO) as f:
         user_info = json.load(f)
     
+    if not os.path.exists(file_path):
+        print("The path provided could not be found. Please check your session file path")
+        return
+
     # Determine if the path is a directory or a file
     if os.path.isdir(file_path):
         print("loading files from directory")
@@ -217,7 +248,9 @@ def main():
                     fam = temp_fam
                 else:
                     print("Invalid choice. choose from {}\n".format(str(FAMILIES)[1:-1]))
-
+        elif provide_family == "no":
+            fam = None
+            
         print(peak_locs)
 
         with open(os.path.join("Ready",f_path.split(os.sep)[-1][:-4]+".json"), "w") as o:
@@ -227,16 +260,29 @@ def main():
         upper_gen = SpGr.edges["genus"][fam][1]
         fam_range = range(SpGr.edges["species"][lower_gen][0],1+SpGr.edges["species"][upper_gen][1])
         
-        common_peaks = combination_peaks(peak_locs,f_path.split(os.sep)[-1][:-4],user_info,URL,fam)
-        histo = np.histogram(common_peaks,bins=fam_range)
+        common_peaks,guesses = combination_peaks(peak_locs,f_path.split(os.sep)[-1][:-4],user_info,URL,fam)
+        
+
         plt.figure(figsize=(len(fam_range)//2,4))
-        plt.bar(histo[1][:-1],histo[0],align="center")
-        plt.gca().set_xticks(histo[1][:-1])
-        plt.savefig()
+        prev_histograms = []
+        for rank in range(1,5):
+            histo = np.histogram(guesses["species_{}".format(rank)],bins=fam_range)
+
+            if rank > 1:
+                plt.bar(histo[1][:-1],histo[0],
+                    bottom=np.sum(np.vstack(prev_histograms),axis=0),align="center")
+            else:
+                plt.bar(histo[1][:-1],histo[0],align="center")
+            
+            plt.gca().set_xticks(histo[1][:-1])
+            prev_histograms.append(histo[0])
+            
+        plt.savefig(f_path.split(os.sep)[-1][:-4]+".png")
         plt.show(block=False)
 
 
 if __name__ == "__main__":
     main()
+
 
 
