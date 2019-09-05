@@ -3,7 +3,7 @@ from __future__ import division
 
 from Notation import SpaceGroupsDict as spgs
 
-SpGr = spgs.spacegroups()
+notation_dictionary = spgs.spacegroups()
 
 import PeakFinding2 as pfnd #custom library to handle the functions behind Find_Peaks
 import UniversalLoader2 as uvll #custom library to handle the functions behind UniversalLoader
@@ -129,9 +129,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     payload = {'peaks':peak_locations['vec'],
                 'level':"Family",
                 'mode':"DiffOnly",
-                'number':0,
-                'First Prediction':None,
-                'Second Prediction':None
+                'number':0
                 }
 
     family = requests.post(URL+"predict", json=payload).json()
@@ -147,18 +145,25 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     # Once the family is known, predicts the genus
     genus = requests.post(URL+"predict", json=payload,timeout=30).json()
     
-    payload["level"] = "species"
-    payload["number"] = genus['predicted']
+    genera_votes = np.sum(genus['votes'],axis=0)[0].tolist()
+    genera_pred = genera_votes + notation_dictionary.edges["genus"][payload['family']][0]
 
-    payload["genus"] = genus['predicted']
+
+    # Configure payload json for next request
+    payload["level"] = "species"
+    payload["number"] = genera_pred
+    payload["genus"] = genera_pred
      
-   
     # Once the genera are predicted give the top two from each
     species = requests.post(URL+"predict", json=payload,timeout=30).json()
     print(species)
 
     # Formatting the response to be saved more easily
+    species_votes = np.sum(species['votes'],axis=0)[0].tolist()
+    species_pred = species_votes + notation_dictionary.edges["genus"][genera_pred][0]
     
     # First prediction
-    payload["species"] = species['predicted']
+    payload["species"] = species_pred
+
+    
     return payload

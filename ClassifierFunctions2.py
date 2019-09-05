@@ -76,11 +76,9 @@ def write_to_csv(path,data_dict):
     row = []
 
     row.append(data_dict["file_name"])
-    
     row.append(data_dict["family"])
     row.append(data_dict["genus"])
     row.append(data_dict["species"])
-    
     row.append(data_dict["peaks"])
 
     with open(path, "ab") as csv_file:
