@@ -36,7 +36,7 @@ def vote_peaks(signal, filter_size=10,passes=2,threshold=.6):
     # step through the array and vote for peak locations 
     for i in range(0,size):
         
-        print(np.argmax(signal[i:i+filter_size])+i)
+        #print(np.argmax(signal[i:i+filter_size])+i)
         votes[np.argmax(signal[i:i+filter_size])+i] += scalar
   
     # Pare down the votes to remove extraneous peaks but preserve candidates

@@ -133,34 +133,32 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
                 }
 
     family = requests.post(URL+"predict", json=payload).json()
-    print(family['votes'])
     
-    print(np.argmax(family['votes']))
-    payload['family'] = int_to_fam[family['predicted']]
+    payload['family'] = int_to_fam[np.argmax(family['votes'])]
 
     payload["level"] = "Genera"
-    payload["number"] = family['predicted']+1
+    payload["number"] = int(np.argmax(family['votes']))+1
     
         
     # Once the family is known, predicts the genus
     genus = requests.post(URL+"predict", json=payload,timeout=30).json()
     
-    genera_votes = np.sum(genus['votes'],axis=0)[0].tolist()
-    genera_pred = genera_votes + notation_dictionary.edges["genus"][payload['family']][0]
+    genera_votes = np.sum(genus['votes'],axis=0).tolist()
+    genera_pred = int(np.argmax(genera_votes)) + notation_dictionary.edges["genus"][payload['family']][0]
 
 
     # Configure payload json for next request
-    payload["level"] = "species"
+    payload["level"] = "Species"
     payload["number"] = genera_pred
     payload["genus"] = genera_pred
-     
+    
     # Once the genera are predicted give the top two from each
     species = requests.post(URL+"predict", json=payload,timeout=30).json()
-    print(species)
+    
 
     # Formatting the response to be saved more easily
-    species_votes = np.sum(species['votes'],axis=0)[0].tolist()
-    species_pred = species_votes + notation_dictionary.edges["genus"][genera_pred][0]
+    species_votes = int(np.argmax(species['votes']))
+    species_pred = species_votes + notation_dictionary.edges["species"][genera_pred][0]
     
     # First prediction
     payload["species"] = species_pred
