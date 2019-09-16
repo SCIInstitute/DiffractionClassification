@@ -86,7 +86,7 @@ def main():
         print("I successfully loaded the data")
 
         peak_locs = ClientSide2.Find_Peaks(image_data,scale)
-        print peak_locs
+        print(peak_locs)
         # Choose which peaks to classify on
         if manual_peak_selection:
             #peak_locs = cf.choose_peaks(peak_locs)
