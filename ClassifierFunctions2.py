@@ -1,6 +1,6 @@
 import csv
 import os
-import numpy as np 
+import numpy as np
 
 from matplotlib import pyplot as plt
 from future.builtins.misc import input

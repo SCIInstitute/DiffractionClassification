@@ -208,7 +208,7 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     payload = {'peaks':peak_locations['vec'],
                 'family':fam,
                 'genus':None,
-                'genus_confidence':0,
+                'genus_confidence':None,
                 'First Prediction':None,
                 'Second Prediction':None
                 }
@@ -218,10 +218,14 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     if fam is None:
         family = requests.post(URL+"predict/family", json=payload).text
         payload['family'] = int_to_fam[family]
+        print(payload['family'])
+        print(requests.post(URL+"predict/family", json=payload).text)
         
         
     # Once the family is known, predicts the genus
-    genus = requests.post(URL+"predict/genera", json=payload,timeout=30).json()
+    print(payload)
+    print(requests.post(URL+"predict/genera", json=payload).text)
+    genus = requests.post(URL+"predict/genera", json=payload).json()
     
     print(genus)
 

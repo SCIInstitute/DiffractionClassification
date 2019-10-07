@@ -14,6 +14,9 @@ from builtins import input
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
 URL = "http://ec2-35-162-10-63.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+URL = "http://ec2-34-214-102-24.us-west-2.compute.amazonaws.com/"
+#URL =  "http://ec2-34-219-165-244.us-west-2.compute.amazonaws.com/"
+#URL =  "http://ec2-52-43-57-12.us-west-2.compute.amazonaws.com/"
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
