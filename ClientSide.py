@@ -235,6 +235,8 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
     payload['genus_confidence_2'] = genus["genus_confidence_2"]
 
     # Once the genera are predicted give the top two from each
+    print(payload)
+    print(requests.post(URL+"predict/species", json=payload,timeout=30).text)
     species = requests.post(URL+"predict/species", json=payload,timeout=30).json()
     print(species)
 
