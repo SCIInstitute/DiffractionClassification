@@ -71,6 +71,7 @@ def plot_peaks(signal,scale,votes):
     indicies = np.where(votes>0)
     plt.figure(figsize=(6,2))
     plt.plot(scale,signal,linewidth=3)
+    
     sig_min = np.amin(signal)
 
     counter = 1

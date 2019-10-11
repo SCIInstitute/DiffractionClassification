@@ -96,8 +96,17 @@ def Find_Peaks(profile,scale):
 
     return peak_locs
 
+def find_name_in_dict(name,dict):
+    o_ind = False
+    for ind, nm in dict.items():
+        if nm == name:
+            o_ind = ind
 
-def Send_For_Classification(peak_locations,user_info,URL,fam=None):
+    return o_ind
+
+
+
+def Send_For_Classification(peak_locations,crystal_family,user_info,URL,fam=None):
     """
     Input: 
 
@@ -132,29 +141,54 @@ def Send_For_Classification(peak_locations,user_info,URL,fam=None):
                 'number':0
                 }
 
-    family = requests.post(URL+"predict", json=payload).json()
-    
-    payload['family'] = int_to_fam[np.argmax(family['votes'])]
+    print(payload)
 
-    payload["level"] = "Genera"
-    payload["number"] = int(np.argmax(family['votes']))+1
-    
+    skip_family = False
+
+    if crystal_family:
+        number = find_name_in_dict(crystal_family,int_to_fam)
+        if number:
+          payload['family'] = crystal_family
+          payload['number'] = number+1
+          skip_family = True
+
+    if not skip_family:
+        print(requests.post(URL+"predict", json=payload).text)
+
+        family = requests.post(URL+"predict", json=payload).json()
+        print(family['votes'])
+        payload['family'] = int_to_fam[np.argmax(family['votes'])]
+
+        payload['number'] = int(np.argmax(family['votes']))+1
+
+        print(np.argmax(family['votes']))
+
+    payload['level'] = "Genera"
         
     # Once the family is known, predicts the genus
+    print(requests.post(URL+"predict", json=payload,timeout=30))
     genus = requests.post(URL+"predict", json=payload,timeout=30).json()
+
+
+    print(genus['votes'])
     
     genera_votes = np.sum(genus['votes'],axis=0).tolist()
     genera_pred = int(np.argmax(genera_votes)) + notation_dictionary.edges["genus"][payload['family']][0]
 
 
     # Configure payload json for next request
-    payload["level"] = "Species"
-    payload["number"] = genera_pred
-    payload["genus"] = genera_pred
-    
+    payload['level'] = "Species"
+    payload['number'] = genera_pred
+    payload['genus'] = genera_pred
+
+
+
+
     # Once the genera are predicted give the top two from each
+    print(requests.post(URL+"predict", json=payload,timeout=30))
     species = requests.post(URL+"predict", json=payload,timeout=30).json()
-    
+
+    print(species)
 
     # Formatting the response to be saved more easily
     species_votes = int(np.argmax(species['votes']))

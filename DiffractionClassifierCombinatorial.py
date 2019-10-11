@@ -18,7 +18,7 @@ from itertools import combinations,chain
 
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
-URL = #you'll need me to send you the link
+URL = "http://ec2-34-219-165-244.us-west-2.compute.amazonaws.com/" #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 

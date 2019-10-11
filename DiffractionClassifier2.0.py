@@ -13,12 +13,13 @@ from builtins import input
 
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
-#URL =  "http://ec2-34-214-102-24.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
-URL =  "http://ec2-34-219-165-244.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+URL =  "http://ec2-34-214-102-24.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+#URL =  "http://ec2-34-219-165-244.us-west-2.compute.amazonaws.com/"#you'll need me to send you the link
+#URL =  "http://ec2-54-218-209-196.us-west-2.compute.amazonaws.com/"
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
-DEFAULT_SESSION = os.path.join ("Sessions","session2.json")
+DEFAULT_SESSION = os.path.join ("Sessions","session.json")
 
 
 def build_parser():
@@ -59,6 +60,14 @@ def main():
     output_file = session["output_file"]
 
     manual_peak_selection = session["manual_peak_selection"]
+
+    known_family = session["known_family"]
+
+    if known_family and known_family=='yes':
+        print('known family')
+        crystal_family = session["crystal_family"]
+    else:
+        crystal_family = None
     
     # Load user from provided path, [IN PROGRESS]
     with open(USER_INFO) as f:
@@ -84,16 +93,18 @@ def main():
         print("loading data from {}".format(f_path))
         image_data,scale = ClientSide2.Load_Profile(f_path)
         print("I successfully loaded the data")
+        
 
         peak_locs = ClientSide2.Find_Peaks(image_data,scale)
-        print(peak_locs)
         # Choose which peaks to classify on
         if manual_peak_selection:
             #peak_locs = cf.choose_peaks(peak_locs)
             raise NotImplementedError
+        
+        print(peak_locs)
 
             
-        classificated = ClientSide2.Send_For_Classification(peak_locs,user_info,URL)  
+        classificated = ClientSide2.Send_For_Classification(peak_locs,crystal_family,user_info,URL)
 
         classificated["file_name"] = f_path
 

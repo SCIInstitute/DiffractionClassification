@@ -236,8 +236,8 @@ def write_to_csv(path,data_dict):
     row.append(data_dict["hall_4"])
 
     row.append(data_dict["peaks"])
-
-    with open(path, "ab") as csv_file:
+    
+    with open(path, "a") as csv_file:
         filewriter = csv.writer(csv_file, delimiter=",")
         filewriter.writerow(row)
 
