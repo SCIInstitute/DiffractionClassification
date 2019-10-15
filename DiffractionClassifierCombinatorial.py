@@ -18,7 +18,7 @@ from itertools import combinations,chain
 
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
-URL = "http://ec2-34-219-165-244.us-west-2.compute.amazonaws.com/" #you'll need me to send you the link
+URL = "http://ec2-.compute.amazonaws.com/" #, fake link. you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -52,7 +52,7 @@ def write_to_csv(path,data_dict):
            "species_4","confidence_4","hall_4","peaks"]    # if no file exists create a one and warn the user
     if not os.path.exists(path):
         print("creating new output file {}".format(path))
-        with open(path, "wb") as csv_file:
+        with open(path, "w") as csv_file:
             filewriter = csv.writer(csv_file, delimiter=",")
             filewriter.writerow(schema)
 
@@ -81,7 +81,7 @@ def write_to_csv(path,data_dict):
 
     row.append(data_dict["peaks"])
 
-    with open(path, "ab") as csv_file:
+    with open(path, "a") as csv_file:
         filewriter = csv.writer(csv_file, delimiter=",")
         filewriter.writerow(row)
 
