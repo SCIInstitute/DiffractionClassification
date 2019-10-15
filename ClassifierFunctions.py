@@ -207,7 +207,7 @@ def write_to_csv(path,data_dict):
     # if no file exists create a one and inform the user
     if not os.path.exists(path):
         print("creating new output file {}".format(path))
-        with open(path, "wb") as csv_file:
+        with open(path, "w") as csv_file:
             filewriter = csv.writer(csv_file, delimiter=",")
             filewriter.writerow(schema)
 
