@@ -268,7 +268,7 @@ def main():
         plots = []
 
         for rank in range(1,5):
-            histo = np.histogram(guesses["species_{}".format(rank)],bins=fam_range)
+            histo = np.histogram([int(g) for g in guesses["species_{}".format(rank)]],bins=fam_range)
             #histo[0] = histo[0]*(2-(rank/5.0))
            
             if rank > 1:
