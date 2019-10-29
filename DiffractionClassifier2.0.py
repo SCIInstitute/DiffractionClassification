@@ -97,8 +97,8 @@ def main():
         peak_locs = ClientSide2.Find_Peaks(image_data,scale)
         # Choose which peaks to classify on
         if manual_peak_selection:
-            #peak_locs = cf.choose_peaks(peak_locs)
-            raise NotImplementedError
+            peak_locs = cf.choose_peaks(peak_locs)
+            #raise NotImplementedError
         
         print(peak_locs)
 

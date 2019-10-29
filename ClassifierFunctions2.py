@@ -11,9 +11,11 @@ def choose_peaks(peaks):
     prompt user to select which peaks to classify on
     """
     d = peaks
+    
+    [print(key) for key in d]
      
-    maximum = len(d)
-    print(len(d))
+    maximum = len(d['d_spacing'])
+    print(maximum)
     raw_choices =  input("Choose which peaks you'd like to select separated by spaces.\n").split(" ")
 
     temp_choices = []
@@ -30,10 +32,11 @@ def choose_peaks(peaks):
 
     print(temp_choices)
 
+    
     temp_locs = {
-                "d_spacing":[d[i-1] for i in temp_choices],
-                "2theta":[theta[i-1] for i in temp_choices],
-                "vec":[vec[i-1] for i in temp_choices]
+                "d_spacing":[d['d_spacing'][i-1] for i in temp_choices],
+                #"2theta":[theta[i-1] for i in temp_choices],
+                "vec":[d['vec'][i-1] for i in temp_choices]
                 }
 
     return temp_locs
