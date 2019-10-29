@@ -268,7 +268,7 @@ def main():
         plots = []
 
         for rank in range(1,5):
-            histo = np.histogram(guesses["species_{}".format(rank)],bins=fam_range)
+            histo = np.histogram([int(g) for g in guesses["species_{}".format(rank)]],bins=fam_range)
             #histo[0] = histo[0]*(2-(rank/5.0))
            
             if rank > 1:
@@ -285,7 +285,7 @@ def main():
         plt.xlabel("Prediction",fontsize=10,rotation='vertical')
         plt.ylabel("Counts",fontsize=10)
         #plt.legend(plots,("species_1","species_2","species_3","species_4")) 
-        plt.savefig(f_path.split(os.sep)[-1][:-4]+".png")
+        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+".png")
         plt.show(block=False)
 
 
