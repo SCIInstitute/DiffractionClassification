@@ -1,6 +1,7 @@
 import csv
 import os
 import numpy as np
+import time
 
 from matplotlib import pyplot as plt
 from future.builtins.misc import input
@@ -13,10 +14,49 @@ def choose_peaks(peaks):
     d = peaks
     
     [print(key) for key in d]
+    print(d)
      
     maximum = len(d['d_spacing'])
     print(maximum)
-    raw_choices =  input("Choose which peaks you'd like to select separated by spaces.\n").split(" ")
+
+    #plt.waitforbuttonpress()
+    plt.title('select peaks.  Enter to stop.')
+    
+    raw_choices = []
+    while True:
+        pts = []
+        pts = plt.ginput(100, timeout=-1)
+        #if len(pts) < 3:
+        #time.sleep(1)  # Wait a second
+            
+        print(pts)
+        print(len(pts))
+
+        #ph = plt.fill(pts[:, 0], pts[:, 1], 'r', lw=2)
+
+        #raw_choices.append(pts)
+        
+        index = []
+        for p in pts:
+#          print(p[0])
+#          print(np.abs(d['d_spacing']-p[0]))
+            index.append(np.argmin(np.abs(d['d_spacing']-p[0])))
+        
+        index.sort()
+        
+        print(index)
+      
+      
+        plt.title('Enter to keep peaks, or reselect points')
+        if plt.waitforbuttonpress():
+            break
+            
+    
+    
+    
+    #raw_choices =  input("Choose which peaks you'd like to select separated by spaces.\n").split(" ")
+    
+    raw_choices = index
 
     temp_choices = []
 

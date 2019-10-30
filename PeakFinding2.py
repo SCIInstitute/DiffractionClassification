@@ -70,6 +70,7 @@ def plot_peaks(signal,scale,votes):
 
     indicies = np.where(votes>0)
     plt.figure(figsize=(6,2))
+    plt.ion()
     plt.plot(scale,signal,linewidth=3)
     
     sig_min = np.amin(signal)
@@ -83,9 +84,12 @@ def plot_peaks(signal,scale,votes):
     
 
     plt.xlim(.5,6)
-    plt.title("d spacing")
+    plt.xlabel("d spacing")
+    plt.ylabel("intensity")
     
 
     plt.legend()
-    plt.show(block=False)
+    plt.show()
+    
+    
 
