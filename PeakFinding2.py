@@ -89,8 +89,6 @@ def plot_peaks(signal,scale,votes):
     plt.xlabel("d spacing")
     plt.ylabel("intensity")
     
-    print(plt.gca())
-    
 
     #plt.legend()
 #    plt.show()

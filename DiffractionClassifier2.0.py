@@ -12,13 +12,12 @@ from builtins import input
     
 
 # Initialize essential global variables
-#USER_INFO = "user_profile.json"
-
 #URL =  "" #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
 DEFAULT_SESSION = os.path.join ("Sessions","session.json")
+DEFAULT_USER = "user_profile.json"
 
 
 def build_parser():
@@ -66,15 +65,18 @@ def main():
         crystal_family = None
     
     # Load user from provided path, [IN PROGRESS]
-    with open(session["user_info"],'r') as f:
-        user_info = json.load(f)
+    if session["user_info"]
+        with open(session["user_info"],'r') as f:
+            user_info = json.load(f)
+    else:
+        with open(DEFAULT_USER,'r') as f:
+            user_info = json.load(f)
     
     with open(session["server_info"],'r') as f:
         server_info = json.load(f)
         
     if server_info['URL']:
         url = server_info['URL']
-        print(url)
     else:
         raise ValueError('you need to have the server URL provided to you')
         
