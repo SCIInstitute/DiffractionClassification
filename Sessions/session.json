@@ -5,8 +5,8 @@
 "output_file":"ResultsPTest.csv",
 "known_family":"yes",
 "crystal_family":"tetragonal",
-"user_info":"user_info.json",
+"user_info":"user_profile.json",
 "display_type":"both",
 "scale_bar":"d",
-"server_info: server.json"
+"server_info":"server.json"
 }

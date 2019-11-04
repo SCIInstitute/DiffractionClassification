@@ -12,9 +12,9 @@ from builtins import input
     
 
 # Initialize essential global variables
-USER_INFO = "user_profile.json"
+#USER_INFO = "user_profile.json"
 
-URL =  "" #you'll need me to send you the link
+#URL =  "" #you'll need me to send you the link
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -41,7 +41,7 @@ def main():
     parser = build_parser()
     options = parser.parse_args()
 
-    print(options.session)
+    #print(options.session)
 
     # opens the user specified session
     if options.session:
@@ -66,8 +66,18 @@ def main():
         crystal_family = None
     
     # Load user from provided path, [IN PROGRESS]
-    with open(USER_INFO) as f:
+    with open(session["user_info"],'r') as f:
         user_info = json.load(f)
+    
+    with open(session["server_info"],'r') as f:
+        server_info = json.load(f)
+        
+    if server_info['URL']:
+        url = server_info['URL']
+        print(url)
+    else:
+        raise ValueError('you need to have the server URL provided to you')
+        
     
     # Determine if the path is a directory or a file
     if os.path.isdir(file_path):
@@ -101,7 +111,7 @@ def main():
         print(peak_locs)
 
             
-        classificated = ClientSide2.Send_For_Classification(peak_locs,crystal_family,user_info,URL)
+        classificated = ClientSide2.Send_For_Classification(peak_locs,crystal_family,user_info,url)
 
         classificated["file_name"] = f_path
 
