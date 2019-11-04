@@ -75,21 +75,27 @@ def plot_peaks(signal,scale,votes):
     
     sig_min = np.amin(signal)
 
+
+    peaks_h =[]
     counter = 1
     for index in indicies[0]:
         x = np.array([scale[index],scale[index]])
         y = np.array([signal[index],sig_min])
-        plt.plot(x,y,linewidth=2,label="peak {}".format(counter))
+        line = plt.plot(x,y,linewidth=2,label="peak {}".format(counter))
         counter += 1 
-    
+        peaks_h.append(line)
 
     plt.xlim(.5,6)
     plt.xlabel("d spacing")
     plt.ylabel("intensity")
     
+    print(plt.gca())
+    
 
-    plt.legend()
-    plt.show()
+    #plt.legend()
+#    plt.show()
+    
+    return peaks_h
     
     
 

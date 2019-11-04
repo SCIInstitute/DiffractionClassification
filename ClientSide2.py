@@ -86,7 +86,7 @@ def Find_Peaks(profile,scale):
         }
 
     # Display the data
-    pfnd.plot_peaks(profile[squished_scale],scale[squished_scale],peaks)
+    peaks_h = pfnd.plot_peaks(profile[squished_scale],scale[squished_scale],peaks)
 
     if len(peak_locs['vec']) <= 2:
         print("WARNING: only {} peaks were detected," + 
@@ -94,7 +94,7 @@ def Find_Peaks(profile,scale):
             "\nfor best results. Please check calibration.".format(len(peaks_d)))
 
 
-    return peak_locs
+    return peak_locs, peaks_h
 
 def find_name_in_dict(name,dict):
     o_ind = False

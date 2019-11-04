@@ -51,15 +51,12 @@ def main():
     # opens the default session    
     else:
         with open(DEFAULT_SESSION,'r') as f:
-
             session = json.load(f)
 
     # set variables from loaded session data
     file_path = session["file_path"]
     output_file = session["output_file"]
-
     manual_peak_selection = session["manual_peak_selection"]
-
     known_family = session["known_family"]
 
     if known_family and known_family=='yes':
@@ -93,11 +90,12 @@ def main():
         image_data,scale = ClientSide2.Load_Profile(f_path)
         print("I successfully loaded the data")
         
+        print(scale)
 
-        peak_locs = ClientSide2.Find_Peaks(image_data,scale)
+        peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale)
         # Choose which peaks to classify on
         if manual_peak_selection:
-            peak_locs = cf.choose_peaks(peak_locs)
+            peak_locs = cf.choose_peaks(peak_locs,peaks_h)
             #raise NotImplementedError
         
         print(peak_locs)
