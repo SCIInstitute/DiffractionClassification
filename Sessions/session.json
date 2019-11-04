@@ -7,4 +7,6 @@
 "crystal_family":"tetragonal",
 "user_info":"user_info.json",
 "display_type":"both",
-"scale_bar":"d"}
+"scale_bar":"d",
+"server_info: server.json"
+}
