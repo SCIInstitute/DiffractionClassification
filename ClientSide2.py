@@ -144,12 +144,13 @@ def Send_For_Classification(peak_locations,crystal_family,user_info,URL,fam=None
     print(payload)
 
     skip_family = False
-
+    # reproduce the gen 1 ability to specify the family to look it.  Use this if the family prediction seems suspect.
     if crystal_family:
         number = find_name_in_dict(crystal_family,int_to_fam)
         if number:
           payload['family'] = crystal_family
           payload['number'] = number+1
+          payload['fam_confidence'] = float("nan")
           skip_family = True
 
     if not skip_family:
@@ -158,6 +159,8 @@ def Send_For_Classification(peak_locations,crystal_family,user_info,URL,fam=None
         family = requests.post(URL+"predict", json=payload).json()
         print(family['votes'])
         payload['family'] = int_to_fam[np.argmax(family['votes'])]
+        fam_confidence = confidence(family['votes'])
+        payload['fam_confidence'] = fam_confidence[np.argmax(family['votes'])]
 
         payload['number'] = int(np.argmax(family['votes']))+1
 
@@ -169,33 +172,110 @@ def Send_For_Classification(peak_locations,crystal_family,user_info,URL,fam=None
     print(requests.post(URL+"predict", json=payload,timeout=30))
     genus = requests.post(URL+"predict", json=payload,timeout=30).json()
 
-
+    print("---genus---")
     print(genus['votes'])
     
-    genera_votes = np.sum(genus['votes'],axis=0).tolist()
-    genera_pred = int(np.argmax(genera_votes)) + notation_dictionary.edges["genus"][payload['family']][0]
+#    genera_votes = np.sum(genus['votes'],axis=0).tolist()
+#    genera_votes_1 = int(np.argmax(genus['votes']))
+    genera_votes = genus['votes']
+    pred_1 = int(np.argmax(genera_votes))
+    genera_pred_1 =  pred_1+ notation_dictionary.edges["genus"][payload['family']][0]
+    genera_con = confidence(genus['votes'])
+    
+    genera_votes[pred_1] = - float("inf")
+    
+    print(genera_votes)
+    
+    pred_2 = int(np.argmax(genera_votes))
+    genera_pred_2 =  pred_2+ notation_dictionary.edges["genus"][payload['family']][0]
 
 
     # Configure payload json for next request
     payload['level'] = "Species"
-    payload['number'] = genera_pred
-    payload['genus'] = genera_pred
+    payload['number'] = genera_pred_1
+    payload['genus_1'] = genera_pred_1
+    payload['gen_confidence_1'] = genera_con[pred_1]
+    payload['genus_2'] = genera_pred_2
+    payload['gen_confidence_2'] = genera_con[pred_2]
+    
+   
+    
 
-
-
-
-    # Once the genera are predicted give the top two from each
+    # species prediction 1
+    print("---species first genus---")
     print(requests.post(URL+"predict", json=payload,timeout=30))
-    species = requests.post(URL+"predict", json=payload,timeout=30).json()
+    species_1 = requests.post(URL+"predict", json=payload,timeout=30).json()
 
-    print(species)
+    print(species_1)
+    
+    
+    print(species_1['votes'])
 
     # Formatting the response to be saved more easily
-    species_votes = int(np.argmax(species['votes']))
-    species_pred = species_votes + notation_dictionary.edges["species"][genera_pred][0]
+    species1_votes = species_1['votes']
+    pred_1 = int(np.argmax(species1_votes))
+    species_pred_1 = pred_1 + notation_dictionary.edges["species"][genera_pred_1][0]
+    
+    spec1_confidence = confidence(species1_votes)
+    
+    species1_votes[pred_1] = -float("inf")
+    pred_2 = int(np.argmax(species1_votes))
+    species_pred_2 = pred_2 + notation_dictionary.edges["species"][genera_pred_1][0]
     
     # First prediction
-    payload["species"] = species_pred
+    payload["species_1"] = species_pred_1
+    payload["spec_confidence_1"] = spec1_confidence[pred_1]
+    payload["species_2"] = species_pred_2
+    payload["spec_confidence_2"] = spec1_confidence[pred_2]
+    
+    # species prediction 2
+    print("---species second genus---")
+    payload['number'] = genera_pred_2
+    
+    print(requests.post(URL+"predict", json=payload,timeout=30))
+    species_2 = requests.post(URL+"predict", json=payload,timeout=30).json()
+
+    print(species_2)
+    
+    print(species_2['votes'])
+
+    # Formatting the response to be saved more easily
+    species2_votes = species_2['votes']
+    pred_3 = int(np.argmax(species2_votes))
+    species_pred_3 = pred_3 + notation_dictionary.edges["species"][genera_pred_2][0]
+    
+    spec2_confidence = confidence(species2_votes)
+    
+    species2_votes[pred_3] = -float("inf")
+    pred_4 = int(np.argmax(species2_votes))
+    species_pred_4 = pred_4 + notation_dictionary.edges["species"][genera_pred_2][0]
+     
+     # second prediction
+    payload["species_3"] = species_pred_3
+    payload["spec_confidence_3"] = spec2_confidence[pred_3]
+    payload["species_4"] = species_pred_4
+    payload["spec_confidence_4"] = spec2_confidence[pred_4]
+    
 
     
     return payload
+    
+    
+def confidence(array):
+    # softmax like normalization
+    np_array = np.array(array)
+        
+    total = np.sum(np.exp(np_array))
+    
+#    print('softmax -')
+#    print(np_array)
+#    print(total)
+#    print(np.exp(np_array)/total)
+
+    #L = -np_array+np.log(total)
+    #L = -np.log(np.exp(np_array)/total)
+    L = np.exp(np_array)/total
+    
+    return L
+    
+    

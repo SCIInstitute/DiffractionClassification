@@ -65,7 +65,7 @@ def main():
         crystal_family = None
     
     # Load user from provided path, [IN PROGRESS]
-    if session["user_info"]
+    if session["user_info"]:
         with open(session["user_info"],'r') as f:
             user_info = json.load(f)
     else:

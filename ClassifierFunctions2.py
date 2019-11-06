@@ -98,7 +98,7 @@ def write_to_csv(path,data_dict):
     """
 
 
-    schema = ["file_name","family","genus","species","peaks"]
+    schema = ["file_name","family","confidence", "genus 1st pred","confidence", "species_1", "confidence", "species_2", "confidence", "genus 2nd pred","confidence","species_3", "confidence", "species_4", "confidence", "peaks"]
 
     # if no file exists create a one and inform the user
     if not os.path.exists(path):
@@ -111,8 +111,22 @@ def write_to_csv(path,data_dict):
 
     row.append(data_dict["file_name"])
     row.append(data_dict["family"])
-    row.append(data_dict["genus"])
-    row.append(data_dict["species"])
+    row.append(data_dict["fam_confidence"])
+    row.append(data_dict["genus_1"])
+    row.append(data_dict["gen_confidence_1"])
+    
+    row.append(data_dict["species_1"])
+    row.append(data_dict["spec_confidence_1"])
+    row.append(data_dict["species_2"])
+    row.append(data_dict["spec_confidence_2"])
+    
+    row.append(data_dict["genus_2"])
+    row.append(data_dict["gen_confidence_2"])
+    
+    row.append(data_dict["species_3"])
+    row.append(data_dict["spec_confidence_3"])
+    row.append(data_dict["species_4"])
+    row.append(data_dict["spec_confidence_4"])
     row.append(data_dict["peaks"])
 
     with open(path, "a") as csv_file:
