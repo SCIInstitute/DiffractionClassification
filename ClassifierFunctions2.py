@@ -92,16 +92,31 @@ def provide_family():
     return family
 
 
-def write_to_csv(path,data_dict):
+def write_to_csv(path, data_dict, prediction_per_level):
     """
     save new row of results to csv
     """
 
 
-    schema = ["file_name","family","confidence", "genus 1st pred","confidence", "species_1", "confidence", "species_2", "confidence", "genus 2nd pred","confidence","species_3", "confidence", "species_4", "confidence", "peaks"]
+#    schema = ["file_name","family","confidence", "genus 1st pred","confidence", "species_1", "confidence", "species_2", "confidence", "genus 2nd pred","confidence","species_3", "confidence", "species_4", "confidence", "peaks"]
+    
+    ppl = prediction_per_level
 
     # if no file exists create a one and inform the user
     if not os.path.exists(path):
+        schema = ["file_name"]
+        for k in range(ppl):
+            schema.append("family_"+str(k+1))
+            schema.append("family_confidence_"+str(k+1))
+            for l in range(ppl):
+                gn=k*ppl+l
+                schema.append("genus_"+str(gn+1))
+                schema.append("genus_confidence_"+str(gn+1))
+                for m in range(ppl):
+                    schema.append("species_"+str(gn*ppl+m+1))
+                    schema.append("species_confidence_"+str(gn*ppl+m+1))
+        schema.append("peaks")
+                    
         print("creating new output file {}".format(path))
         with open(path, "w") as csv_file:
             filewriter = csv.writer(csv_file, delimiter=",")
@@ -110,23 +125,35 @@ def write_to_csv(path,data_dict):
     row = []
 
     row.append(data_dict["file_name"])
-    row.append(data_dict["family"])
-    row.append(data_dict["fam_confidence"])
-    row.append(data_dict["genus_1"])
-    row.append(data_dict["gen_confidence_1"])
     
-    row.append(data_dict["species_1"])
-    row.append(data_dict["spec_confidence_1"])
-    row.append(data_dict["species_2"])
-    row.append(data_dict["spec_confidence_2"])
-    
-    row.append(data_dict["genus_2"])
-    row.append(data_dict["gen_confidence_2"])
-    
-    row.append(data_dict["species_3"])
-    row.append(data_dict["spec_confidence_3"])
-    row.append(data_dict["species_4"])
-    row.append(data_dict["spec_confidence_4"])
+    for k in range(ppl):
+        row.append(data_dict["family_"+str(k+1)])
+        row.append(data_dict["fam_confidence_"+str(k+1)])
+        for l in range(ppl):
+            gn=k*ppl+l
+            row.append(data_dict["genus_"+str(gn+1)])
+            row.append(data_dict["gen_confidence_"+str(gn+1)])
+            for m in range(ppl):
+                row.append(data_dict["species_"+str(gn*ppl+m+1)])
+                row.append(data_dict["spec_confidence_"+str(gn*ppl+m+1)])
+            
+#    row.append(data_dict["family"])
+#    row.append(data_dict["fam_confidence"])
+#    row.append(data_dict["genus_1"])
+#    row.append(data_dict["gen_confidence_1"])
+#
+#    row.append(data_dict["species_1"])
+#    row.append(data_dict["spec_confidence_1"])
+#    row.append(data_dict["species_2"])
+#    row.append(data_dict["spec_confidence_2"])
+#
+#    row.append(data_dict["genus_2"])
+#    row.append(data_dict["gen_confidence_2"])
+#
+#    row.append(data_dict["species_3"])
+#    row.append(data_dict["spec_confidence_3"])
+#    row.append(data_dict["species_4"])
+#    row.append(data_dict["spec_confidence_4"])
     row.append(data_dict["peaks"])
 
     with open(path, "a") as csv_file:

@@ -106,7 +106,7 @@ def find_name_in_dict(name,dict):
 
 
 
-def Send_For_Classification(peak_locations,crystal_family,user_info,URL,fam=None):
+def Send_For_Classification(peak_locations, crystal_family, user_info, URL, prediction_per_level, fam=None):
     """
     Input: 
 
@@ -142,124 +142,74 @@ def Send_For_Classification(peak_locations,crystal_family,user_info,URL,fam=None
                 }
 
     print(payload)
+    
+    payload['prediction_per_level'] = prediction_per_level
 
     skip_family = False
     # reproduce the gen 1 ability to specify the family to look it.  Use this if the family prediction seems suspect.
     if crystal_family:
+        print(" setting the family to search in is old functionality that is no longer needed for most predictions")
         number = find_name_in_dict(crystal_family,int_to_fam)
         if number:
-          payload['family'] = crystal_family
-          payload['number'] = number+1
-          payload['fam_confidence'] = float("nan")
-          skip_family = True
+            payload['family'] = crystal_family
+            payload['family_1'] = crystal_family
+            payload['fam_confidence_1'] = float("nan")
+                
+            
+            payload['number'] = number+1
+            skip_family = True
+            
+            payload = Classify_Family(peak_locations,payload,user_info,URL,1)
+            
+            for k in range(1,prediction_per_level):
+                payload['family_'+str(1+k)] = float("nan")
+                payload['fam_confidence_'+str(1+k)] = float("nan")
+                
+                for l in range(1,prediction_per_level):
+                    num_l = (k-1)*prediction_per_level+l+1
+                    payload['genus_'+str(num_l)] = float("nan")
+                    payload['gen_confidence_'+str(num_l)] = float("nan")
+                    
+                    for m in range(1,prediction_per_level):
+                        payload['genus_'+str(1+k)] = float("nan")
+                        payload['gen_confidence_'+str(1+k)] = float("nan")
+                    
+            
+            
+        else:
+            print("family name not recognized, ignoring input.")
 
     if not skip_family:
         print(requests.post(URL+"predict", json=payload).text)
-
         family = requests.post(URL+"predict", json=payload).json()
         print(family['votes'])
-        payload['family'] = int_to_fam[np.argmax(family['votes'])]
-        fam_confidence = confidence(family['votes'])
-        payload['fam_confidence'] = fam_confidence[np.argmax(family['votes'])]
-
-        payload['number'] = int(np.argmax(family['votes']))+1
-
-        print(np.argmax(family['votes']))
-
-    payload['level'] = "Genera"
+        fam_votes = family['votes']
+        pred = []
+#        pred.append(np.argmax(family['votes']))
+#        payload['family_1'] = int_to_fam[pred[0]]
+        fam_confidence = confidence(fam_votes)
+#        payload['fam_confidence_1'] = fam_confidence[pred[0]]
+#        payload['number'] = int(pred[0])+1
+#
+#        print(pred[0])
+#        Classify_Family(peak_locations,payload,user_info,URL,1)
+        print(fam_confidence)
+        print(payload)
         
-    # Once the family is known, predicts the genus
-    print(requests.post(URL+"predict", json=payload,timeout=30))
-    genus = requests.post(URL+"predict", json=payload,timeout=30).json()
-
-    print("---genus---")
-    print(genus['votes'])
-    
-#    genera_votes = np.sum(genus['votes'],axis=0).tolist()
-#    genera_votes_1 = int(np.argmax(genus['votes']))
-    genera_votes = genus['votes']
-    pred_1 = int(np.argmax(genera_votes))
-    genera_pred_1 =  pred_1+ notation_dictionary.edges["genus"][payload['family']][0]
-    genera_con = confidence(genus['votes'])
-    
-    genera_votes[pred_1] = - float("inf")
-    
-    print(genera_votes)
-    
-    pred_2 = int(np.argmax(genera_votes))
-    genera_pred_2 =  pred_2+ notation_dictionary.edges["genus"][payload['family']][0]
-
-
-    # Configure payload json for next request
-    payload['level'] = "Species"
-    payload['number'] = genera_pred_1
-    payload['genus_1'] = genera_pred_1
-    payload['gen_confidence_1'] = genera_con[pred_1]
-    payload['genus_2'] = genera_pred_2
-    payload['gen_confidence_2'] = genera_con[pred_2]
-    
-   
-    
-
-    # species prediction 1
-    print("---species first genus---")
-    print(requests.post(URL+"predict", json=payload,timeout=30))
-    species_1 = requests.post(URL+"predict", json=payload,timeout=30).json()
-
-    print(species_1)
-    
-    
-    print(species_1['votes'])
-
-    # Formatting the response to be saved more easily
-    species1_votes = species_1['votes']
-    pred_1 = int(np.argmax(species1_votes))
-    species_pred_1 = pred_1 + notation_dictionary.edges["species"][genera_pred_1][0]
-    
-    spec1_confidence = confidence(species1_votes)
-    
-    species1_votes[pred_1] = -float("inf")
-    pred_2 = int(np.argmax(species1_votes))
-    species_pred_2 = pred_2 + notation_dictionary.edges["species"][genera_pred_1][0]
-    
-    # First prediction
-    payload["species_1"] = species_pred_1
-    payload["spec_confidence_1"] = spec1_confidence[pred_1]
-    payload["species_2"] = species_pred_2
-    payload["spec_confidence_2"] = spec1_confidence[pred_2]
-    
-    # species prediction 2
-    print("---species second genus---")
-    payload['number'] = genera_pred_2
-    
-    print(requests.post(URL+"predict", json=payload,timeout=30))
-    species_2 = requests.post(URL+"predict", json=payload,timeout=30).json()
-
-    print(species_2)
-    
-    print(species_2['votes'])
-
-    # Formatting the response to be saved more easily
-    species2_votes = species_2['votes']
-    pred_3 = int(np.argmax(species2_votes))
-    species_pred_3 = pred_3 + notation_dictionary.edges["species"][genera_pred_2][0]
-    
-    spec2_confidence = confidence(species2_votes)
-    
-    species2_votes[pred_3] = -float("inf")
-    pred_4 = int(np.argmax(species2_votes))
-    species_pred_4 = pred_4 + notation_dictionary.edges["species"][genera_pred_2][0]
-     
-     # second prediction
-    payload["species_3"] = species_pred_3
-    payload["spec_confidence_3"] = spec2_confidence[pred_3]
-    payload["species_4"] = species_pred_4
-    payload["spec_confidence_4"] = spec2_confidence[pred_4]
-    
-
-    
+        for k in range(prediction_per_level):
+            pred.append(np.argmax(fam_votes))
+            payload['family'] = int_to_fam[pred[k]]
+            payload['family_'+str(k+1)] = int_to_fam[pred[k]]
+            payload['fam_confidence_'+str(k+1)] =fam_confidence[pred[k]]
+            payload['number'] = int(pred[k])+1
+            payload = Classify_Family(peak_locations,payload,user_info,URL,k+1)
+            
+            # for next iteration
+            fam_votes[pred[k-1]] = -float("inf")
+            
+            
     return payload
-    
+
     
 def confidence(array):
     # softmax like normalization
@@ -275,7 +225,103 @@ def confidence(array):
     #L = -np_array+np.log(total)
     #L = -np.log(np.exp(np_array)/total)
     L = np.exp(np_array)/total
+#    L = np_array/np.sum(np_array)
     
     return L
+    
+def Classify_Family(peak_locations,payload,user_info,URL,pred_number):
+
+    payload['level'] = "Genera"
+        
+    # Once the family is known, predicts the genus
+    print(requests.post(URL+"predict", json=payload,timeout=30))
+    genus = requests.post(URL+"predict", json=payload,timeout=30).json()
+
+    print("---genus---")
+    print(genus['votes'])
+    
+#    genera_votes = np.sum(genus['votes'],axis=0).tolist()
+#    genera_votes_1 = int(np.argmax(genus['votes']))
+    genera_votes = genus['votes']
+    genera_con = confidence(genera_votes)
+    pred=[]
+    genera_pred = []
+    
+    for k in range(payload['prediction_per_level']):
+        pred.append(int(np.argmax(genera_votes)))
+        print(pred[k])
+        g_pred_num = (pred_number-1)*payload['prediction_per_level']+k+1
+        genera_pred.append(pred[k]+ notation_dictionary.edges["genus"][payload['family']][0])
+        payload['genus_'+str(g_pred_num)] = genera_pred[k]
+        payload['gen_confidence_'+str(g_pred_num)] = genera_con[pred[k]]
+        
+        payload['number'] = genera_pred[k]
+        print('genus prediction = ',genera_pred[k])
+        print('genus_number = ',g_pred_num)
+        payload = Classify_Genus(peak_locations,payload,user_info,URL,g_pred_num)
+   
+        genera_votes[pred[k]] = - float("inf")
+        print(genera_votes)
+        
+    return payload
+    
+#    pred_2 = int(np.argmax(genera_votes))
+#    genera_pred_2 =  pred_2+ notation_dictionary.edges["genus"][payload['family']][0]
+#
+#
+#    payload['genus_2'] = genera_pred_2
+#    payload['gen_confidence_2'] = genera_con[pred_2]
+    
+    # Configure payload json for next request
+    
+    
+    
+    
+    
+
+def Classify_Genus(peak_locations,payload,user_info,URL,pred_number):
+
+    # species prediction 1
+    print("---species first genus---")
+    payload['level'] = "Species"
+    
+    print(requests.post(URL+"predict", json=payload,timeout=30))
+    species = requests.post(URL+"predict", json=payload,timeout=30).json()
+
+    print(species)
+
+
+    print(species['votes'])
+
+    # Formatting the response to be saved more easily
+    species_votes = species['votes']
+    spec_confidence = confidence(species_votes)
+    pred = []
+    species_pred = []
+    
+    print(payload)
+    
+    for k in range(payload['prediction_per_level']):
+        pred.append(int(np.argmax(species_votes)))
+        species_pred.append(pred[k] + notation_dictionary.edges["species"][payload['genus_'+str(pred_number)]][0])
+        num = (pred_number-1)*payload['prediction_per_level']+k+1
+        print('species number = ',num)
+        payload["species_"+str(num)] = species_pred[k]
+        payload["spec_confidence_"+str(num)] = spec_confidence[pred[k]]
+
+        species_votes[pred[0]] = -float("inf")
+        
+    return payload
+        
+#    pred_2 = int(np.argmax(species1_votes))
+#    species_pred_2 = pred_2 + notation_dictionary.edges["species"][payload['genus_'+str(pred_number)]][0]
+
+    # First prediction
+#    payload["species_1"] = species_pred_1
+#    payload["spec_confidence_1"] = spec1_confidence[pred_1]
+#    payload["species_2"] = species_pred_2
+#    payload["spec_confidence_2"] = spec1_confidence[pred_2]
+
+
     
     

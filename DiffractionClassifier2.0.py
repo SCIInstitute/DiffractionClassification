@@ -19,6 +19,8 @@ FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
 DEFAULT_SESSION = os.path.join ("Sessions","session.json")
 DEFAULT_USER = "user_profile.json"
 
+prediction_per_level = 2
+
 
 def build_parser():
     parser = argparse.ArgumentParser()
@@ -113,7 +115,7 @@ def main():
         print(peak_locs)
 
             
-        classificated = ClientSide2.Send_For_Classification(peak_locs,crystal_family,user_info,url)
+        classificated = ClientSide2.Send_For_Classification(peak_locs, crystal_family, user_info, url, prediction_per_level)
 
         classificated["file_name"] = f_path
 
@@ -121,7 +123,7 @@ def main():
         print(classificated)
 
         # write results out to the specified file
-        cf.write_to_csv(os.path.join("Results",output_file),classificated)
+        cf.write_to_csv(os.path.join("Results",output_file), classificated, prediction_per_level)
 
 if __name__ == "__main__":
     main()
