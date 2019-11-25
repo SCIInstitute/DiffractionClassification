@@ -18,8 +18,10 @@ FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
 
 DEFAULT_SESSION = os.path.join ("Sessions","session.json")
 DEFAULT_USER = "user_profile.json"
+SERVER_INFO = "server_gen2.json"
 
-prediction_per_level = 2
+# list of three, one per level
+prediction_per_level = [2, 3, 3]
 
 
 def build_parser():
@@ -55,14 +57,31 @@ def main():
             session = json.load(f)
 
     # set variables from loaded session data
+#    print(session)
     file_path = session["file_path"]
     output_file = session["output_file"]
     manual_peak_selection = session["manual_peak_selection"]
     known_family = session["known_family"]
+    chemistry = session["chemistry"]
+    diffraction = session["diffraction"]
+    
+    mode = ""
+    
+    if diffraction:
+        if chemistry:
+            mode="DiffChem"
+        else:
+            mode="DiffOnly"
+    else:
+        if chemistry:
+            raise ValueError('Running chemistry only predictions is currently not implemented')
+        else:
+            raise ValueError('Invalid prediction type. Either diffraction or chemistry must be enabled')
 
     if known_family and known_family=='yes':
         print('known family')
         crystal_family = session["crystal_family"]
+        prediction_per_level[0] = 1
     else:
         crystal_family = None
     
@@ -81,6 +100,8 @@ def main():
         url = server_info['URL']
     else:
         raise ValueError('you need to have the server URL provided to you')
+    
+    chem_vec = cf.check_for_chemistry(session)
         
     
     # Determine if the path is a directory or a file
@@ -104,18 +125,23 @@ def main():
         image_data,scale = ClientSide2.Load_Profile(f_path)
         print("I successfully loaded the data")
         
-        print(scale)
+#        print(scale)
 
-        peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale)
-        # Choose which peaks to classify on
-        if manual_peak_selection:
-            peak_locs = cf.choose_peaks(peak_locs,peaks_h)
-            #raise NotImplementedError
-        
-        print(peak_locs)
+        if diffraction:
+            peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale)
+            # Choose which peaks to classify on
+            if manual_peak_selection:
+                peak_locs = cf.choose_peaks(peak_locs,peaks_h)
+                #raise NotImplementedError
+        else:
+            peak_locs = []
+            peaks_h = []
+#        
+#        print(peak_locs)
+#        print(chem_vec)
 
             
-        classificated = ClientSide2.Send_For_Classification(peak_locs, crystal_family, user_info, url, prediction_per_level)
+        classificated = ClientSide2.Send_For_Classification(peak_locs, chem_vec, mode, crystal_family, user_info, url, prediction_per_level)
 
         classificated["file_name"] = f_path
 

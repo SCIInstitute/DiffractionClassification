@@ -6,6 +6,8 @@ import time
 from matplotlib import pyplot as plt
 from future.builtins.misc import input
 
+from mendeleev import element
+
 
 def choose_peaks(peaks,peak_h):
     """
@@ -105,16 +107,17 @@ def write_to_csv(path, data_dict, prediction_per_level):
     # if no file exists create a one and inform the user
     if not os.path.exists(path):
         schema = ["file_name"]
-        for k in range(ppl):
+        for k in range(ppl[0]):
             schema.append("family_"+str(k+1))
             schema.append("family_confidence_"+str(k+1))
-            for l in range(ppl):
-                gn=k*ppl+l
+            for l in range(ppl[1]):
+                gn=k*ppl[1]+l
                 schema.append("genus_"+str(gn+1))
                 schema.append("genus_confidence_"+str(gn+1))
-                for m in range(ppl):
-                    schema.append("species_"+str(gn*ppl+m+1))
-                    schema.append("species_confidence_"+str(gn*ppl+m+1))
+                for m in range(ppl[2]):
+                    schema.append("species_"+str(gn*ppl[2]+m+1))
+                    schema.append("species_confidence_"+str(gn*ppl[2]+m+1))
+                    schema.append("hall_"+str(gn*ppl[2]+m+1))
         schema.append("peaks")
                     
         print("creating new output file {}".format(path))
@@ -126,39 +129,91 @@ def write_to_csv(path, data_dict, prediction_per_level):
 
     row.append(data_dict["file_name"])
     
-    for k in range(ppl):
+    for k in range(ppl[0]):
         row.append(data_dict["family_"+str(k+1)])
         row.append(data_dict["fam_confidence_"+str(k+1)])
-        for l in range(ppl):
-            gn=k*ppl+l
+        for l in range(ppl[1]):
+            gn=k*ppl[1]+l
             row.append(data_dict["genus_"+str(gn+1)])
             row.append(data_dict["gen_confidence_"+str(gn+1)])
-            for m in range(ppl):
-                row.append(data_dict["species_"+str(gn*ppl+m+1)])
-                row.append(data_dict["spec_confidence_"+str(gn*ppl+m+1)])
-            
-#    row.append(data_dict["family"])
-#    row.append(data_dict["fam_confidence"])
-#    row.append(data_dict["genus_1"])
-#    row.append(data_dict["gen_confidence_1"])
-#
-#    row.append(data_dict["species_1"])
-#    row.append(data_dict["spec_confidence_1"])
-#    row.append(data_dict["species_2"])
-#    row.append(data_dict["spec_confidence_2"])
-#
-#    row.append(data_dict["genus_2"])
-#    row.append(data_dict["gen_confidence_2"])
-#
-#    row.append(data_dict["species_3"])
-#    row.append(data_dict["spec_confidence_3"])
-#    row.append(data_dict["species_4"])
-#    row.append(data_dict["spec_confidence_4"])
+            for m in range(ppl[2]):
+                row.append(data_dict["species_"+str(gn*ppl[2]+m+1)])
+                row.append(data_dict["spec_confidence_"+str(gn*ppl[2]+m+1)])
+                row.append(data_dict["hall_"+str(gn*ppl[2]+m+1)])
+                
     row.append(data_dict["peaks"])
 
     with open(path, "a") as csv_file:
         filewriter = csv.writer(csv_file, delimiter=",")
         filewriter.writerow(row)
+        
+def check_for_chemistry(session):
 
+    # tries to identify chemistry information from session file
+    
+    if "chemistry" not in session or not session["chemistry"]:
+        return []
+    
+        
+    if "atomic_percentage" in session:
+#        print('percentage of each element by count')
+        chem_vec = session["atomic_percentage"]
+        
+    elif "chemical_formula" in session:
+#        print('expected chemical formula')
+        chem_vec = str2chem(session["chemical_formula"])
+        tot_elem = 0
+        for cv in chem_vec:
+            tot_elem+=cv[1]
+        for k in range(len(chem_vec)):
+            chem_vec[k][1] /= tot_elem
+        
+    elif "atomic_density" in session:
+#        print('percentage of each element by mass')
+        print("Warning: atomic density may not improve the accuracy, especially if atomic weights of the elements are significantly different")
+        chem_vec = session["atomic_density"]
+        
+    elif "cemical_contents" in session:
+#        print('list of elements to expect')
+        cc = session["cemical_contents"]
+        chem_vec = []
+        for elem in cc:
+            chem_vec.append([element(elem).atomic_number, 1/len(cc)])
+    
+    else:
+        print("not enough data to run chemistry prediction.  Ignoring")
+        return []
+        
+    return chem_vec
 
+def str2chem(string):
+    
+    elem_list = []
+    new_elem = False
+    prev_elem = ''
+    prev_num = ''
+    for k,c in enumerate(string):
+
+        if c.isdigit():
+            prev_num+=c
+        elif c.islower():
+            prev_elem+=c
+        
+        if c.isupper() or k==len(string)-1:
+            if prev_elem:
+                try:
+                    elem = element(prev_elem).atomic_number
+                except:
+                    raise ValueError("Something wrong with Chemical formula input")
+                if prev_num:
+                    num = int(prev_num)
+                else:
+                    num = 1
+                
+                elem_list.append([elem,num])
+            prev_elem = c
+            prev_num = ''
+    return elem_list
+        
+      
 

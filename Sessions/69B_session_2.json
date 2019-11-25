@@ -1,0 +1,12 @@
+{"file_path":"Data/69B_DiffractPatterns/04_Cs",
+"auto_calibrate":"calibration.json",
+"manual_peak_selection":false,
+"is_profile":true,
+"output_file":"Results69B_test_gen2_test.csv",
+"known_family":"no",
+"crystal_family":"cubic",
+"user_info":"user_profile.json",
+"display_type":"both",
+"scale_bar":"d",
+"server_info":"server_gen2.json"
+}

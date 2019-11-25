@@ -13,8 +13,8 @@ from builtins import input
 
 # Initialize essential global variables
 USER_INFO = "user_profile.json"
-URL = ""#you'll need me to send you the link
-
+#URL = ""#you'll need me to send you the link
+SERVER_INFO = "server_gen1.json"
 FAMILIES = ["triclinic","monoclinic","orthorhombic","tetragonal",
         "trigonal","hexagonal","cubic"]
 
@@ -75,6 +75,15 @@ def main():
         print("No calibration could be loaded from {}\nPlease check the file exists and is formatted properly".format(auto_calibrate))
         calibration = cf.set_calibration(is_profile)
     print(calibration)
+    
+    with open(SERVER_INFO,'r') as f:
+        server_info = json.load(f)
+        
+    if server_info['URL']:
+        URL = server_info['URL']
+    else:
+        raise ValueError('you need to have the server URL provided to you')
+        
 
 
     # Load user from provided path, [IN PROGRESS]
