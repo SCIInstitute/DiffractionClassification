@@ -9,7 +9,11 @@ import ClassifierFunctions2 as cf
 from matplotlib import pyplot as plt
 from builtins import input
 
-    
+from Notation import SpaceGroupsDict as spgs
+SpGr = spgs.spacegroups()
+
+from itertools import combinations,chain
+
 
 # Initialize essential global variables
 #URL =  "" #you'll need me to send you the link
@@ -37,7 +41,14 @@ def build_parser():
                         metavar='SESSION',required=False, default=None)
     return parser
 
-def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, user_info, URL, fam, prediction_per_level):
+def powerset(iterable):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+
+
+def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, user_info, URL, prediction_per_level):
 
     outpath = "Ready"
     find_valid_peaks = list(powerset(peak_batch["vec"]))
@@ -47,10 +58,13 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     valid_peaks_combinations = [{"vec":proto_combo} for proto_combo in find_valid_peaks]
     found = False
     threshold = 0
-    guesses = {"species_1":[],
-                "species_2":[],
-                "species_3":[],
-                "species_4":[]}
+    tot_spec = 0
+    for p in prediction_per_level:
+        tot_spec *= p
+    
+    guesses = {}
+    for k in range(1,tot_spec+1):
+        guesses = {"species_"+str(k):[]}
 
     common_peaks = []
     failed_combos = valid_peaks_combinations
@@ -65,16 +79,17 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
                 print(classificated)
                 classificated["file_name"] = temp_name
                 write_to_csv(os.path.join(outpath,temp_name)+".csv",classificated)
-
-                guesses['species_1'].append(classificated["species_1"])
-                guesses['species_2'].append(classificated["species_2"])
-                guesses['species_3'].append(classificated["species_3"])
-                guesses['species_4'].append(classificated["species_4"])
                 
-                common_peaks.append(classificated["species_1"])
-                common_peaks.append(classificated["species_2"])
-                common_peaks.append(classificated["species_3"])
-                common_peaks.append(classificated["species_4"])
+                for k in range(1,tot_spec+1):
+                    guesses['species_'+k].append( classificated["species_"+str(k)] )
+#                guesses['species_2'].append(classificated["species_2"])
+#                guesses['species_3'].append(classificated["species_3"])
+#                guesses['species_4'].append(classificated["species_4"])
+                
+                    common_peaks.append(classificated["species_"+str(k)])
+#                common_peaks.append(classificated["species_2"])
+#                common_peaks.append(classificated["species_3"])
+#                common_peaks.append(classificated["species_4"])
                 
                 # remove the classified combination
                 failed_combos.remove(combo)
@@ -83,7 +98,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
             except:
                 print("An error occured this combination was not classified.\nIt will be retried {} more times".format(LIMIT-persistance))
 
-        persistance += 1
+                persistance += 1
 
     if len(failed_combos)>0:
         print("there were {} failed combinations".format(len(failed_combos)))
