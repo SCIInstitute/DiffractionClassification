@@ -12,6 +12,8 @@ from builtins import input
 from Notation import SpaceGroupsDict as spgs
 SpGr = spgs.spacegroups()
 
+
+
 from itertools import combinations,chain
 
 
@@ -58,51 +60,64 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     valid_peaks_combinations = [{"vec":proto_combo} for proto_combo in find_valid_peaks]
     found = False
     threshold = 0
-    tot_spec = 0
+    tot_spec = 1
     for p in prediction_per_level:
         tot_spec *= p
-    
     guesses = {}
     for k in range(1,tot_spec+1):
-        guesses = {"species_"+str(k):[]}
-
+        guesses["species_"+str(k)]=[]
+#    print(guesses)
     common_peaks = []
     failed_combos = valid_peaks_combinations
     #peak_locs,user_info,URL,fam
     persistance = 0
     LIMIT = 3
-
+#    print(failed_combos)
     while len(failed_combos) > 0 and persistance < LIMIT:
         for combo in failed_combos:
             try:
+#                print('---classifying---')
+#                print(combo)
                 classificated = ClientSide2.Send_For_Classification(combo, chem_vec, mode, crystal_family, user_info, URL, prediction_per_level)
                 print(classificated)
                 classificated["file_name"] = temp_name
-                write_to_csv(os.path.join(outpath,temp_name)+".csv",classificated)
-                
+#                print('name =')
+#                print(temp_name)
+                print(os.path.join(outpath,temp_name))
+                cf.write_to_csv(os.path.join(outpath,temp_name) + ".csv", classificated, prediction_per_level)
+                print(tot_spec)
                 for k in range(1,tot_spec+1):
-                    guesses['species_'+k].append( classificated["species_"+str(k)] )
+#                    print(k)
+#                    print(guesses['species_'+str(k)])
+#                    print(classificated["species_"+str(k)])
+                    guesses['species_'+str(k)].append( classificated["species_"+str(k)] )
+                    common_peaks.append(classificated["species_"+str(k)])
+                    
 #                guesses['species_2'].append(classificated["species_2"])
 #                guesses['species_3'].append(classificated["species_3"])
 #                guesses['species_4'].append(classificated["species_4"])
-                
-                    common_peaks.append(classificated["species_"+str(k)])
+            
 #                common_peaks.append(classificated["species_2"])
 #                common_peaks.append(classificated["species_3"])
 #                common_peaks.append(classificated["species_4"])
                 
                 # remove the classified combination
+#                print('guesses=')
+#                print(guesses)
+#                print('common_peaks=')
+#                print(common_peaks)
                 failed_combos.remove(combo)
+                
             except KeyboardInterrupt:
                 raise
             except:
                 print("An error occured this combination was not classified.\nIt will be retried {} more times".format(LIMIT-persistance))
 
-                persistance += 1
+        persistance += 1
 
     if len(failed_combos)>0:
         print("there were {} failed combinations".format(len(failed_combos)))
-
+    print('returning')
     return common_peaks, guesses
 
 
@@ -207,11 +222,21 @@ def main():
 #        print(peak_locs)
 #        print(chem_vec)
 
-        fam_range = range(1,231)
+        
         
         common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, f_path.split(os.sep)[-1][:-4], crystal_family, user_info, url, prediction_per_level)
+        
+        if crystal_family:
+            lower_gen = SpGr.edges["genus"][crystal_family][0]
+            upper_gen = SpGr.edges["genus"][crystal_family][1]
+        else:
+            lower_gen = SpGr.edges["genus"][FAMILIES[0]][0]
+            upper_gen = SpGr.edges["genus"][FAMILIES[-1]][1]
+        fam_range = range(SpGr.edges["species"][lower_gen][0],1+SpGr.edges["species"][upper_gen][1])
+            
 
         plt.figure(figsize=(len(fam_range)//2,4))
+        plt.ion
         prev_histograms = []
         plots = []
         
@@ -232,18 +257,10 @@ def main():
         plt.xlabel("Prediction",fontsize=10,rotation='vertical')
         plt.ylabel("Counts",fontsize=10)
         #plt.legend(plots,("species_1","species_2","species_3","species_4"))
-        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+".png")
-        plt.show(block=False)
-            
-#        classificated = ClientSide2.Send_For_Classification(peak_locs, chem_vec, mode, crystal_family, user_info, url, prediction_per_level)
-#
-#        classificated["file_name"] = f_path
-#
-#        # update the user on the results before saving
-#        print(classificated)
-#
-#        # write results out to the specified file
-#        cf.write_to_csv(os.path.join("Results",output_file), classificated, prediction_per_level)
+        print("Results/"+f_path.split(os.sep)[-1][:-4]+"gen2.png")
+        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
+#        plt.show(block=False)
+        
 
 if __name__ == "__main__":
     main()

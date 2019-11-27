@@ -293,8 +293,9 @@ def main():
 
         plt.xlabel("Prediction",fontsize=10,rotation='vertical')
         plt.ylabel("Counts",fontsize=10)
-        #plt.legend(plots,("species_1","species_2","species_3","species_4")) 
-        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+".png")
+        #plt.legend(plots,("species_1","species_2","species_3","species_4"))
+        print("Results/"+f_path.split(os.sep)[-1][:-4]+"gen1.png")
+        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen1.png")
         plt.show(block=False)
 
 
