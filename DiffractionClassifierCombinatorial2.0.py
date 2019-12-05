@@ -185,7 +185,8 @@ def main():
     
     chem_vec = cf.check_for_chemistry(session)
         
-    
+    print(file_path)
+    print('---starting loop--')
     # Determine if the path is a directory or a file
     if os.path.isdir(file_path):
         print("loading files from directory")
@@ -199,6 +200,7 @@ def main():
         file_paths = [file_path]
     
 
+    print(file_paths)
     for f_path in file_paths:
 
         # Load Data from specified file (DM3, TIFF, CSV etc....)
@@ -234,32 +236,67 @@ def main():
             upper_gen = SpGr.edges["genus"][FAMILIES[-1]][1]
         fam_range = range(SpGr.edges["species"][lower_gen][0],1+SpGr.edges["species"][upper_gen][1])
             
+        #        phi = 2*np.pi/360
+        fig_ang = 300
+        phi = (2*np.pi*fig_ang/360)/(max(fam_range)-min(fam_range)+1)
+        thet = fig_ang/(max(fam_range)-min(fam_range)+1)
+        fam_axes = [1,3,16,75,143,168,195]
+        fig1 = plt.figure(1,figsize=(len(fam_range),8))
+#        ax1 = fig1.add_axes([0.1,0.1,.8,.8])
 
-        plt.figure(figsize=(len(fam_range)//2,4))
         plt.ion
+        fig2 = plt.figure(2,figsize=(8,8))
+        plt.ion
+        ax2 = fig2.add_axes([0.1,0.1,0.8,0.8],polar=True)
+        ax2.set_thetamax(1)
+        ax2.set_thetamax(fig_ang)
+        ax2.set_theta_zero_location("S",offset=30)
+        #        ax2.set_theta_zero_location("N")
+        ax2.set_thetagrids([f*thet for f in fam_axes],labels = FAMILIES)
         prev_histograms = []
-        plots = []
-        
-        for rank in range(1,5):
+        plots_1 = []
+        plots_2 = []
+        #        print('guesses = ')
+        #        print(guesses)
+        num_pred = np.prod(prediction_per_level)
+        for rank in range(1,num_pred+1):
             histo = np.histogram([int(g) for g in guesses["species_{}".format(rank)]],bins=fam_range)
-            
             if rank > 1:
-                plot = plt.bar(histo[1][:-1],histo[0],
-                    bottom=np.sum(np.vstack(prev_histograms),axis=0),align="center")
+                plt.figure(1)
+                plot_1 = plt.bar(histo[1][:-1], histo[0], bottom = np.sum(np.vstack(prev_histograms), axis=0), align="center", width = 1)
+                plt.figure(2)
+                plot_2 = plt.bar(histo[1][:-1]*phi, histo[0], bottom = np.sum(np.vstack(prev_histograms), axis=0),align="center", width = 2*phi)
             else:
-                plot = plt.bar(histo[1][:-1],histo[0],align="center",color='red')
-                
-            plots.append(plot)
+                plt.figure(1)
+                plot_1 = plt.bar(histo[1][:-1], histo[0], align="center", color='red', width = 1)
+                plt.figure(2)
+                plot_2 = plt.bar(histo[1][:-1]*phi, histo[0], align="center", color='red', width = 2*phi)
+            plots_1.append(plot_1)
+            plots_2.append(plot_2)
+            plt.figure(1)
             plt.yticks(rotation='vertical')
             plt.xticks(histo[1][:-1],rotation='vertical')
             prev_histograms.append(histo[0])
+            plt.figure(2)
+        #            ax2.set_xticks(histo[1][:-1])
 
-        plt.xlabel("Prediction",fontsize=10,rotation='vertical')
+        plt.figure(1)
+        plt.xlabel("Prediction",fontsize=10)
         plt.ylabel("Counts",fontsize=10)
-        #plt.legend(plots,("species_1","species_2","species_3","species_4"))
-        print("Results/"+f_path.split(os.sep)[-1][:-4]+"gen2.png")
+        #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
+        leg_list = [ "species_{}".format(k+1) for k in range(num_pred) ]
+        plt.legend(plots_1,leg_list)
+        print("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
         plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
-#        plt.show(block=False)
+
+        plt.figure(2)
+        #        plt.xlabel("Prediction",fontsize=10,rotation='vertical')
+        #        plt.ylabel("Counts",fontsize=10)
+        plt.legend(plots_2,leg_list)
+        #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
+        print("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2_polar.png")
+        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2_polar.png")
+        #        plt.show(block=False)
         
 
 if __name__ == "__main__":
