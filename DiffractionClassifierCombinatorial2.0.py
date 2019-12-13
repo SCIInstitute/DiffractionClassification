@@ -74,7 +74,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     LIMIT = 3
 #    print(failed_combos)
     while len(failed_combos) > 0 and persistance < LIMIT:
-        for combo in failed_combos:
+        for combo in failed_combos[0:10]:
             try:
 #                print('---classifying---')
 #                print(combo)
@@ -228,6 +228,8 @@ def main():
         
         common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, f_path.split(os.sep)[-1][:-4], crystal_family, user_info, url, prediction_per_level)
         
+        # TODO: Split up this function and enable plotting on precomupted data. 
+        
         if crystal_family:
             lower_gen = SpGr.edges["genus"][crystal_family][0]
             upper_gen = SpGr.edges["genus"][crystal_family][1]
@@ -241,46 +243,90 @@ def main():
         phi = (2*np.pi*fig_ang/360)/(max(fam_range)-min(fam_range)+1)
         thet = fig_ang/(max(fam_range)-min(fam_range)+1)
         fam_axes = [1,3,16,75,143,168,195]
-        fig1 = plt.figure(1,figsize=(len(fam_range),8))
-#        ax1 = fig1.add_axes([0.1,0.1,.8,.8])
 
+        #        fig1 = plt.figure(1,figsize=(len(fam_range),16))
+        fig1 = plt.figure(2,figsize=(16,8))
+        ax1 = fig1.add_axes([0.03,0.1,.96,.8])
+#        ax1.set_yscale('log')
+        fam_color = ['k','g','b','c','m','y','k']
+        for k in range(len(fam_axes)-1):
+            ax1.axvspan(fam_axes[k]-0.5,fam_axes[k+1]-0.5,facecolor = fam_color[k], alpha=0.5)
+        #        ax1.axvspan(fam_axes[0],fam_axes[1]-1,alpha=0.5)
+
+        ax1.axvspan(fam_axes[-1]-0.5,np.max(fam_range)-0.5,alpha=0.3)
         plt.ion
-        fig2 = plt.figure(2,figsize=(8,8))
+
+        fig2 = plt.figure(3,figsize=(8,8))
         plt.ion
         ax2 = fig2.add_axes([0.1,0.1,0.8,0.8],polar=True)
-        ax2.set_thetamax(1)
+        ax2.set_thetamin(1)
+        ax2.set_rmin(0)
         ax2.set_thetamax(fig_ang)
-        ax2.set_theta_zero_location("S",offset=30)
-        #        ax2.set_theta_zero_location("N")
-        ax2.set_thetagrids([f*thet for f in fam_axes],labels = FAMILIES)
-        prev_histograms = []
+        ax2.set_rlabel_position(30)
+        ax2.set_theta_direction(-1)
+        ax2.set_theta_zero_location("S",offset=-(360-fig_ang)/2)
+        #        ax2.set_rscale('log')
+        prev_histograms_1 = []
+        prev_histograms_2 = []
         plots_1 = []
         plots_2 = []
         #        print('guesses = ')
         #        print(guesses)
         num_pred = np.prod(prediction_per_level)
         for rank in range(1,num_pred+1):
-            histo = np.histogram([int(g) for g in guesses["species_{}".format(rank)]],bins=fam_range)
+            histo = np.histogram([g for g in guesses["species_{}".format(rank)]],bins=fam_range)
+            histo_log = np.array([np.log10(float(h))+1 if h>0 else 0 for h in histo[0]])
+            print('log_histo = ')
+            print(histo_log.tolist())
             if rank > 1:
-                plt.figure(1)
-                plot_1 = plt.bar(histo[1][:-1], histo[0], bottom = np.sum(np.vstack(prev_histograms), axis=0), align="center", width = 1)
                 plt.figure(2)
-                plot_2 = plt.bar(histo[1][:-1]*phi, histo[0], bottom = np.sum(np.vstack(prev_histograms), axis=0),align="center", width = 2*phi)
+                plot_1 = plt.bar(histo[1][:-1], histo[0], bottom = np.sum(np.vstack(prev_histograms_1), axis=0), align="center", width = 1.1)
+                plt.figure(3)
+                sum_hist = np.sum(np.vstack(prev_histograms_1), axis=0)
+                log_sum = np.array([np.log10(float(h))-1 if h>0 else -1 for h in sum_hist])
+                print('log_sum = ')
+                print(log_sum.tolist())
+                plot_2 = plt.bar(histo[1][:-1]*phi, histo_log, bottom = log_sum, align="center", width = phi)
             else:
-                plt.figure(1)
-                plot_1 = plt.bar(histo[1][:-1], histo[0], align="center", color='red', width = 1)
                 plt.figure(2)
-                plot_2 = plt.bar(histo[1][:-1]*phi, histo[0], align="center", color='red', width = 2*phi)
+                plot_1 = plt.bar(histo[1][:-1], histo[0], align="center", color='red', width = 1.1)
+                plt.figure(3)
+                plot_2 = plt.bar(histo[1][:-1]*phi, histo_log, bottom = -1, align="center", color='red', width = phi)
+                
             plots_1.append(plot_1)
             plots_2.append(plot_2)
-            plt.figure(1)
+            plt.figure(2)
             plt.yticks(rotation='vertical')
             plt.xticks(histo[1][:-1],rotation='vertical')
-            prev_histograms.append(histo[0])
-            plt.figure(2)
+            prev_histograms_1.append(histo[0])
+            prev_histograms_2.append(histo[0])
+        #            plt.figure(3)
         #            ax2.set_xticks(histo[1][:-1])
 
-        plt.figure(1)
+        plt.figure(2)
+        #        ym = ax1.get_ymax()*.9
+
+        r_max = 0
+        for rect in plot_1:
+            n_max = rect.get_height()+rect.get_y()
+            if n_max>r_max:
+                r_max = n_max
+                
+
+        for k in range(len(FAMILIES)-1):
+            if k ==0:
+                ym_t = r_max*0.7
+                cent = 'left'
+            else:
+                ym_t = r_max*0.6
+                cent = 'center'
+            ax1.text((fam_axes[k+1]+fam_axes[k])/2,ym_t, FAMILIES[k],  horizontalalignment=cent)
+
+
+        ax1.text((fam_axes[-1]+np.max(fam_range))/2,ym_t, FAMILIES[k],  horizontalalignment='center')
+            
+        ax1.autoscale(enable=True, axis='x', tight=True)
+        ax1.tick_params(axis='x', which='major', labelsize=6)
         plt.xlabel("Prediction",fontsize=10)
         plt.ylabel("Counts",fontsize=10)
         #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
@@ -289,13 +335,17 @@ def main():
         print("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
         plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
 
-        plt.figure(2)
+        plt.figure(3)
         #        plt.xlabel("Prediction",fontsize=10,rotation='vertical')
         #        plt.ylabel("Counts",fontsize=10)
+        r_ticks = list(range(int(np.floor(ax2.get_rmin())),int(np.ceil(ax2.get_rmax())+1)))
+        ax2.set_rgrids(r_ticks, labels = ['10e'+str(r) for r in r_ticks])
+        ax2.set_thetagrids([f*thet for f in fam_axes],labels = FAMILIES)
         plt.legend(plots_2,leg_list)
         #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
         print("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2_polar.png")
         plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2_polar.png")
+        plt.show()
         #        plt.show(block=False)
         
 
