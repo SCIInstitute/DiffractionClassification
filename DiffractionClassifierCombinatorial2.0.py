@@ -74,7 +74,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     LIMIT = 3
 #    print(failed_combos)
     while len(failed_combos) > 0 and persistance < LIMIT:
-        for combo in failed_combos[0:10]:
+        for combo in failed_combos:
             try:
 #                print('---classifying---')
 #                print(combo)
@@ -228,7 +228,7 @@ def main():
         
         common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, f_path.split(os.sep)[-1][:-4], crystal_family, user_info, url, prediction_per_level)
         
-        # TODO: Split up this function and enable plotting on precomupted data. 
+        # TODO: Split up this function and enable plotting on precomupted data.
         
         if crystal_family:
             lower_gen = SpGr.edges["genus"][crystal_family][0]
