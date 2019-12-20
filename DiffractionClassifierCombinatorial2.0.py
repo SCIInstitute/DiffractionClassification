@@ -76,7 +76,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     LIMIT = 3
 #    print(failed_combos)
     while len(failed_combos) > 0 and persistance < LIMIT:
-        for combo in failed_combos[0:50]:
+        for combo in failed_combos:
             try:
 #                print('---classifying---')
 #                print(combo)
