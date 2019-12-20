@@ -74,7 +74,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     LIMIT = 3
 #    print(failed_combos)
     while len(failed_combos) > 0 and persistance < LIMIT:
-        for combo in failed_combos:
+        for combo in failed_combos[0:50]:
             try:
 #                print('---classifying---')
 #                print(combo)
@@ -323,7 +323,7 @@ def main():
             ax1.text((fam_axes[k+1]+fam_axes[k])/2,ym_t, FAMILIES[k],  horizontalalignment=cent)
 
 
-        ax1.text((fam_axes[-1]+np.max(fam_range))/2,ym_t, FAMILIES[k],  horizontalalignment='center')
+        ax1.text((fam_axes[-1]+np.max(fam_range))/2,ym_t, FAMILIES[-1],  horizontalalignment='center')
             
         ax1.autoscale(enable=True, axis='x', tight=True)
         ax1.tick_params(axis='x', which='major', labelsize=6)
