@@ -149,6 +149,9 @@ def main():
         print(classificated)
 
         # write results out to the specified file
+        if not os.path.exists("Results"):
+            os.makedirs("Results")
+            
         cf.write_to_csv(os.path.join("Results",output_file), classificated, prediction_per_level)
 
 if __name__ == "__main__":

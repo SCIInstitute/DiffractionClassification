@@ -161,7 +161,9 @@ def main():
         print(classificated)
 
         # write results out to the specified file
-        cf.write_to_csv(os.path.join("Results",output_file),classificated)
+        if not os.path.exists("Results"):
+            os.makedirs("Results")
+        cf.write_to_csv(os.path.join("Results", output_file), classificated)
 
 if __name__ == "__main__":
     main()

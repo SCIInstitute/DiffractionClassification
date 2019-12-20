@@ -53,6 +53,8 @@ def powerset(iterable):
 def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, user_info, URL, prediction_per_level):
 
     outpath = "Ready"
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
     find_valid_peaks = list(powerset(peak_batch["vec"]))
     find_valid_peaks = [item for item in find_valid_peaks if len(item) > 2 and len(item) < 6]
     print(len(find_valid_peaks),"valid peak combinations")
@@ -332,6 +334,8 @@ def main():
         #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
         leg_list = [ "species_{}".format(k+1) for k in range(num_pred) ]
         plt.legend(plots_1,leg_list)
+        if not os.path.exists("Results"):
+            os.makedirs("Results")
         print("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
         plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen2.png")
 

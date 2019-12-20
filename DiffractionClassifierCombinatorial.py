@@ -88,8 +88,11 @@ def write_to_csv(path,data_dict):
 
 def combination_peaks(peak_batch,temp_name,user_info,URL,fam):
     outpath = "Ready"
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+    
     find_valid_peaks = list(powerset(peak_batch["vec"]))
-    find_valid_peaks = [item for item in find_valid_peaks if len(item) > 2 and len(item) < 6]
+    find_valid_peaks = [item for item in find_valid_peaks if len(item) > 3 and len(item) < 6]
     print(len(find_valid_peaks),"valid peak combinations")
 
     valid_peaks_combinations = [{"vec":proto_combo} for proto_combo in find_valid_peaks]
@@ -109,10 +112,10 @@ def combination_peaks(peak_batch,temp_name,user_info,URL,fam):
     while len(failed_combos) > 0 and persistance < LIMIT:
         for combo in failed_combos:
             try:
-                classificated = ClientSide.Send_For_Classification(combo,user_info,URL,fam)
+                classificated = ClientSide.Send_For_Classification(combo, user_info, URL, fam)
                 print(classificated)
-                classificated["file_name"] = temp_name 
-                write_to_csv(os.path.join(outpath,temp_name)+".csv",classificated)
+                classificated["file_name"] = temp_name
+                write_to_csv(os.path.join(outpath,temp_name) + ".csv", classificated)
 
                 guesses['species_1'].append(classificated["species_1"])
                 guesses['species_2'].append(classificated["species_2"])
@@ -294,8 +297,10 @@ def main():
         plt.xlabel("Prediction",fontsize=10,rotation='vertical')
         plt.ylabel("Counts",fontsize=10)
         #plt.legend(plots,("species_1","species_2","species_3","species_4"))
+        if not os.path.exists("Results"):
+            os.makedirs("Results")
         print("Results/"+f_path.split(os.sep)[-1][:-4]+"gen1.png")
-        plt.savefig("Results/"+f_path.split(os.sep)[-1][:-4]+"_gen1.png")
+        plt.savefig("Results/" + f_path.split(os.sep)[-1][:-4] + "_gen1.png")
         plt.show(block=False)
 
 
