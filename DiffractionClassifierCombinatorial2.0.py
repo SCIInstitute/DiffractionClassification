@@ -232,8 +232,6 @@ def make_figures(guesses,crystal_family,froot):
     #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
     leg_list = [ "species_{}".format(k+1) for k in range(num_pred) ]
     plt.legend(plots_1,leg_list)
-    if not os.path.exists("Results"):
-        os.makedirs("Results")
     print("Results/"+froot+"_gen2.png")
     plt.savefig("Results/"+froot+"_gen2.png")
 
@@ -346,6 +344,9 @@ def main():
 
     else:
         file_paths = [file_path]
+        
+    if not os.path.exists("Results"):
+        os.makedirs("Results")
     
 
     print(file_paths)
