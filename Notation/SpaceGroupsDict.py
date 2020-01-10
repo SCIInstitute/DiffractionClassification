@@ -7,8 +7,10 @@ class spacegroups:
 		families = []
 		sgs = []
 		geni = []
-
-		with open(os.path.join("Notation","HSGdict.txt"), 'r') as proto:
+  
+        dirname = os.path.dirname(__file__)
+        
+		with open(os.path.join(dirname,"HSGdict.txt"), 'r') as proto:
 			for line in proto.readlines():
 				group, family, sg, genus = line.strip().split('\t')				
 				groups.append(group)
