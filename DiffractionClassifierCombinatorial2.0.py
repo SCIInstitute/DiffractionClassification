@@ -174,7 +174,7 @@ def make_figures(guesses,crystal_family,froot):
     #        print(guesses)
     num_pred = np.prod(prediction_per_level)
     for rank in range(1,num_pred+1):
-        histo = np.histogram([g for g in guesses["species_{}".format(rank)]],bins=fam_range)
+        histo = np.histogram([g for g in guesses["species_{}".format(rank)]], bins = range(min(fam_range), max(fam_range)+1))
         histo_log = np.array([np.log10(float(h))+1 if h>0 else 0 for h in histo[0]])
         print('log_histo = ')
         print(histo_log.tolist())
@@ -259,7 +259,7 @@ def main():
         subset = -1
         
 
-    #print(options.session)
+    print(options.session)
 
     # opens the user specified session
     if options.session:
@@ -391,7 +391,16 @@ def main():
                 peak_locs = []
                 peaks_h = []
     #
-    #        print(peak_locs)
+#            print(len(peak_locs['d_spacing']))
+#            print(peak_locs)
+#            print(peaks_h)
+            
+            
+            if len(peak_locs['d_spacing'])>25:
+                print("there are "+ str(len(peak_locs['d_spacing']))+" peaks, which is too many.")
+                continue
+            
+            
     #        print(chem_vec)
 
             
