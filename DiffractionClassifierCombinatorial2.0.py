@@ -395,7 +395,8 @@ def main():
 #            print(peak_locs)
 #            print(peaks_h)
             
-            
+            # Script hangs when there are too many peaks.
+            # TODO: implement something better. 
             if len(peak_locs['d_spacing'])>25:
                 print("there are "+ str(len(peak_locs['d_spacing']))+" peaks, which is too many.")
                 continue
