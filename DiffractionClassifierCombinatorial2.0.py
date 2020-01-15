@@ -380,9 +380,8 @@ def main():
             with open(outfile, 'r') as fp:
                 guesses = json.load(fp)
         else:
-            
             if diffraction:
-                peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale)
+                peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale,30)
                 # Choose which peaks to classify on
                 if manual_peak_selection:
                     peak_locs = cf.choose_peaks(peak_locs,peaks_h)
@@ -391,8 +390,8 @@ def main():
                 peak_locs = []
                 peaks_h = []
     #
-#            print(len(peak_locs['d_spacing']))
-#            print(peak_locs)
+            print(len(peak_locs['d_spacing']))
+            print(peak_locs)
 #            print(peaks_h)
             
             # Script hangs when there are too many peaks.
