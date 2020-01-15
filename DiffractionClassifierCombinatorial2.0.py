@@ -381,7 +381,7 @@ def main():
                 guesses = json.load(fp)
         else:
             if diffraction:
-                peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale,30)
+                peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale,25)
                 # Choose which peaks to classify on
                 if manual_peak_selection:
                     peak_locs = cf.choose_peaks(peak_locs,peaks_h)
@@ -389,19 +389,13 @@ def main():
             else:
                 peak_locs = []
                 peaks_h = []
-    #
-            print(len(peak_locs['d_spacing']))
-            print(peak_locs)
-#            print(peaks_h)
+
             
             # Script hangs when there are too many peaks.
             # TODO: implement something better. 
             if len(peak_locs['d_spacing'])>25:
                 print("there are "+ str(len(peak_locs['d_spacing']))+" peaks, which is too many.")
                 continue
-            
-            
-    #        print(chem_vec)
 
             
             

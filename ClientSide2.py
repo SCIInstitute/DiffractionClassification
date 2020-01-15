@@ -80,9 +80,6 @@ def Find_Peaks(profile, scale, max_numpeaks=75):
     # find the location of the peaks in pixel space    
     peaks = pfnd.vote_peaks(profile[squished_scale],filter_size=filter_size)
     
-    print("peaks =")
-    print(np.sort(peaks[peaks>0]))
-    
     peaks_d = scale[squished_scale][peaks>0]
     scale_d = scale
     
@@ -92,9 +89,7 @@ def Find_Peaks(profile, scale, max_numpeaks=75):
         "\nFor best results. Please check calibration or run manual peak detection.".format(len(peaks_d)))
         srt_peaks = np.sort(peaks[peaks>0])
         peaks_d = scale[squished_scale][peaks>srt_peaks[len(peaks_d)-max_numpeaks]]
-    
-    print("peaks_d =")
-    print(peaks_d)
+
    
     peak_locs = {"d_spacing":scale[squished_scale][peaks>0],
                 "vec":[int(round((x-.5)*164))-1 for x in peaks_d]
