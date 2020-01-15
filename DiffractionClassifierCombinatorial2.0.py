@@ -146,6 +146,7 @@ def make_figures(guesses,crystal_family,froot):
 
     #        fig1 = plt.figure(1,figsize=(len(fam_range),16))
     fig1 = plt.figure(2,figsize=(16,8))
+    plt.clf()
     ax1 = fig1.add_axes([0.03,0.1,.96,.8])
 #        ax1.set_yscale('log')
     fam_color = ['k','g','b','c','m','y','k']
@@ -157,6 +158,7 @@ def make_figures(guesses,crystal_family,froot):
     plt.ion
 
     fig2 = plt.figure(3,figsize=(8,8))
+    plt.clf()
     plt.ion
     ax2 = fig2.add_axes([0.1,0.1,0.8,0.8],polar=True)
     ax2.set_thetamin(1)
@@ -176,16 +178,16 @@ def make_figures(guesses,crystal_family,froot):
     for rank in range(1,num_pred+1):
         histo = np.histogram([g for g in guesses["species_{}".format(rank)]], bins = range(min(fam_range), max(fam_range)+1))
         histo_log = np.array([np.log10(float(h))+1 if h>0 else 0 for h in histo[0]])
-        print('log_histo = ')
-        print(histo_log.tolist())
+#        print('log_histo = ')
+#        print(histo_log.tolist())
         if rank > 1:
             plt.figure(2)
             plot_1 = plt.bar(histo[1][:-1], histo[0], bottom = np.sum(np.vstack(prev_histograms_1), axis=0), align="center", width = 1.1)
             plt.figure(3)
             sum_hist = np.sum(np.vstack(prev_histograms_1), axis=0)
             log_sum = np.array([np.log10(float(h))-1 if h>0 else -1 for h in sum_hist])
-            print('log_sum = ')
-            print(log_sum.tolist())
+#            print('log_sum = ')
+#            print(log_sum.tolist())
             plot_2 = plt.bar(histo[1][:-1]*phi, histo_log, bottom = log_sum, align="center", width = phi)
         else:
             plt.figure(2)
@@ -394,7 +396,10 @@ def main():
             # Script hangs when there are too many peaks.
             # TODO: implement something better. 
             if len(peak_locs['d_spacing'])>25:
+                print("\n\n======================================================")
                 print("there are "+ str(len(peak_locs['d_spacing']))+" peaks, which is too many.")
+                print(f_path)
+                print("======================================================\n\n")
                 continue
 
             

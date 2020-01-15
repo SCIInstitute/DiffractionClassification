@@ -82,16 +82,21 @@ def Find_Peaks(profile, scale, max_numpeaks=75):
     
     peaks_d = scale[squished_scale][peaks>0]
     scale_d = scale
+    thresh = 0
     
     if len(peaks_d) > max_numpeaks :
+        print(len(peaks_d))
         print("WARNING: {} peaks were detected," +
         " some of the peaks will be trimmed."+
         "\nFor best results. Please check calibration or run manual peak detection.".format(len(peaks_d)))
         srt_peaks = np.sort(peaks[peaks>0])
-        peaks_d = scale[squished_scale][peaks>srt_peaks[len(peaks_d)-max_numpeaks]]
-
+        thresh = srt_peaks[len(peaks_d)-max_numpeaks]
+        peaks_d = scale[squished_scale][peaks>thresh]
+        print(len(peaks_d))
+        
+        
    
-    peak_locs = {"d_spacing":scale[squished_scale][peaks>0],
+    peak_locs = {"d_spacing":scale[squished_scale][peaks>thresh],
                 "vec":[int(round((x-.5)*164))-1 for x in peaks_d]
         }
 
