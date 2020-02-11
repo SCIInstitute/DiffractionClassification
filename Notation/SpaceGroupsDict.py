@@ -1,5 +1,4 @@
 import os
-print(__file__)
 dirname = os.path.dirname(__file__)
 class spacegroups:
 	

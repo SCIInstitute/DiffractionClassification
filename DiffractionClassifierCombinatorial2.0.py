@@ -247,7 +247,7 @@ def make_figures(guesses,crystal_family,froot):
     #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
     print("Results/"+froot+"_gen2_polar.png")
     plt.savefig("Results/"+froot+"_gen2_polar.png")
-    plt.show()
+#    plt.show()
     
 
 def main():

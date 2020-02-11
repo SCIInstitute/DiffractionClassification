@@ -126,7 +126,8 @@ def main():
         print("I successfully loaded the data")
         
 #        print(scale)
-
+        print("length",len(image_data))
+        print("max",np.max(image_data))
         if diffraction:
             peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale)
             # Choose which peaks to classify on
