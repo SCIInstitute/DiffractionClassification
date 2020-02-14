@@ -95,17 +95,14 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     #                print(temp_name)
                 print(os.path.join(outpath,temp_name))
                 cf.write_to_csv(os.path.join(outpath,temp_name) + ".csv", classificated, prediction_per_level)
+                print("------")
+                print(classificated)
                 print(tot_spec)
                 for k in range(1,tot_spec+1):
-    #                    print(k)
-    #                    print(guesses['species_'+str(k)])
-    #                    print(classificated["species_"+str(k)])
-                    print("-------confidence___________")
-                    print(classificated["spec_confidence_"+str(k)])
                     print(guesses)
                     guesses['species_'+str(k)].append( classificated["species_"+str(k)] )
                     guesses['spec_confidence_'+str(k)].append( classificated["spec_confidence_"+str(k)] )
-                    common_peaks.append(classificated["species_"+str(k)])
+                    common_peaks.append(classificated["peaks"])
                     
                     
                 
@@ -365,12 +362,15 @@ def main():
         froot = os.path.splitext(os.path.basename(f_path))[0]
         if output_file_root:
             outfile = 'Results/'+output_file_root+froot+'.json'
+            outfile_2 = 'Results/'+output_file_root+froot+'_peaks.json'
         else:
             output_file_root='' #for the figure filenames
             [outroot, ext] = os.path.splitext(output_file)
             if not ext=='.json':
                 output_file = outroot+'.json'
+                output_fil_2e = outroot+'_peaks.json'
             outfile = 'Results/'+output_file
+            outfile_2 = 'Results/'+output_file_2
 
         # optional skipping the data creation
         if options.figures_only:
@@ -401,13 +401,12 @@ def main():
             
             
             common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, froot, crystal_family, user_info, url, prediction_per_level, subset, num_peaks)
-            
-            print("--------")
-            print(guesses)
         
             # save data
             with open(outfile, 'w') as fp:
                 json.dump(guesses, fp)
+            with open(outfile_2, 'w') as fp:
+                json.dump(common_peaks, fp)
         
         
         if options.data_only:
