@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import ClassifierFunctions2 as cf
+import random
 
 from matplotlib import pyplot as plt
 from builtins import input
@@ -28,7 +29,7 @@ SERVER_INFO = "server_gen2.json"
 
 # list of three, one per level
 prediction_per_level = [1, 1, 2]
-num_peaks = [7, 10]
+num_peaks = [5, 9]
 
 
 def build_parser():
@@ -84,7 +85,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     LIMIT = 3
 #    print(failed_combos)
     while len(failed_combos) > 0 and persistance < LIMIT:
-        for combo in failed_combos[0:subset]:
+        for combo in random.sample(failed_combos, subset):
             try:
 #                print('---classifying---')
 #                print(combo)
@@ -163,8 +164,8 @@ def make_figures(guesses,crystal_family,froot):
     prev_histograms_2 = []
     plots_1 = []
     plots_2 = []
-    print('guesses = ')
-    print(guesses)
+#    print('guesses = ')
+#    print(guesses)
     num_pred = np.prod(prediction_per_level)
     for rank in range(1,num_pred+1):
         histo = np.histogram([g for g in guesses["species_{}".format(rank)]], weights = [g for g in guesses["spec_confidence_{}".format(rank)]], bins = np.arange(min(fam_range)-0.5, max(fam_range)+1.5))
@@ -173,24 +174,24 @@ def make_figures(guesses,crystal_family,froot):
 #        print(histo_log.tolist())
         if rank > 1:
             plt.figure(2)
-            plot_1 = plt.bar(histo[1][:-1], histo[0], bottom = np.sum(np.vstack(prev_histograms_1), axis=0), align="center", width = 1.1)
+            plot_1 = plt.bar(fam_range, histo[0], bottom = np.sum(np.vstack(prev_histograms_1), axis=0), align="center", width = 1.1)
             plt.figure(3)
             sum_hist = np.sum(np.vstack(prev_histograms_1), axis=0)
             log_sum = np.array([np.log10(float(h))-1 if h>0 else -1 for h in sum_hist])
 #            print('log_sum = ')
 #            print(log_sum.tolist())
-            plot_2 = plt.bar(histo[1][:-1]*phi, histo_log, bottom = log_sum, align="center", width = phi)
+            plot_2 = plt.bar([f*phi for f in fam_range], histo_log, bottom = log_sum, align="center", width = phi)
         else:
             plt.figure(2)
-            plot_1 = plt.bar(histo[1][:-1], histo[0], align="center", color='red', width = 1.1)
+            plot_1 = plt.bar(fam_range, histo[0], align="center", color='red', width = 1.1)
             plt.figure(3)
-            plot_2 = plt.bar(histo[1][:-1]*phi, histo_log, bottom = -1, align="center", color='red', width = phi)
+            plot_2 = plt.bar([f*phi for f in fam_range], histo_log, bottom = -1, align="center", color='red', width = phi)
             
         plots_1.append(plot_1)
         plots_2.append(plot_2)
         plt.figure(2)
         plt.yticks(rotation='vertical')
-        plt.xticks(histo[1][:-1],rotation='vertical')
+        plt.xticks(fam_range,rotation='vertical')
         prev_histograms_1.append(histo[0])
         prev_histograms_2.append(histo[0])
     #            plt.figure(3)
