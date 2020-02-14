@@ -28,6 +28,7 @@ SERVER_INFO = "server_gen2.json"
 
 # list of three, one per level
 prediction_per_level = [1, 2, 2]
+num_peaks = [7, 10]
 
 
 def build_parser():
@@ -56,13 +57,13 @@ def powerset(iterable):
 
 
 
-def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, user_info, URL, prediction_per_level, subset):
+def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, user_info, URL, prediction_per_level, subset, num_peaks):
 
     outpath = "Ready"
     if not os.path.exists(outpath):
         os.makedirs(outpath)
     find_valid_peaks = list(powerset(peak_batch["vec"]))
-    find_valid_peaks = [item for item in find_valid_peaks if len(item) > 2 and len(item) < 6]
+    find_valid_peaks = [item for item in find_valid_peaks if len(item) > num_peaks[0] and len(item) < num_peaks[1]]
     print(len(find_valid_peaks),"valid peak combinations")
 
     valid_peaks_combinations = [{"vec":proto_combo} for proto_combo in find_valid_peaks]
@@ -235,7 +236,7 @@ def make_figures(guesses,crystal_family,froot):
     leg_list = [ "species_{}".format(k+1) for k in range(num_pred) ]
     plt.legend(plots_1,leg_list)
     print("Results/"+froot+"_gen2.png")
-    plt.savefig("Results/"+froot+"_gen2.png")
+    plt.savefig("Results/"+froot+"_gen2.png",dpi = 300)
 
     plt.figure(3)
     #        plt.xlabel("Prediction",fontsize=10,rotation='vertical')
@@ -246,7 +247,7 @@ def make_figures(guesses,crystal_family,froot):
     plt.legend(plots_2,leg_list)
     #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
     print("Results/"+froot+"_gen2_polar.png")
-    plt.savefig("Results/"+froot+"_gen2_polar.png")
+    plt.savefig("Results/"+froot+"_gen2_polar.png",dpi = 300)
 #    plt.show()
     
 
@@ -371,10 +372,10 @@ def main():
             outfile = 'Results/'+output_file_root+froot+'.json'
         else:
             output_file_root='' #for the figure filenames
-            [outroot, ext] = os.path.splitext(output_path)
+            [outroot, ext] = os.path.splitext(output_file)
             if not ext=='.json':
                 output_file = outroot+'.json'
-            outfile = 'Results/'+output+file
+            outfile = 'Results/'+output_file
 
         # optional skipping the data creation
         if options.figures_only:
@@ -404,7 +405,7 @@ def main():
 
             
             
-            common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, froot, crystal_family, user_info, url, prediction_per_level, subset)
+            common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, froot, crystal_family, user_info, url, prediction_per_level, subset, num_peaks)
         
             # save data
             with open(outfile, 'w') as fp:

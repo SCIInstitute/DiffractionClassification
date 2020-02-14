@@ -64,7 +64,7 @@ def csv_extract(filepath):
 
 	"""
 
-	csv_file = np.genfromtxt(open(filepath, "rb"), delimiter=",")
+	csv_file = np.genfromtxt(open(filepath, "r"), delimiter=",")
 	profile_data = csv_file
 
 	# Orients columnar data into rows if necessary 
@@ -95,7 +95,7 @@ def txt_extract(filepath):
 	"""
 
 	# Read in the data as a numpy array
-	text_file = np.genfromtxt(open(filepath, "rb"), delimiter="\t")
+	text_file = np.genfromtxt(open(filepath, "r"), delimiter="\t")
 	profile_data = text_file
 
 	# Orients columnar data into rows if necessary 
