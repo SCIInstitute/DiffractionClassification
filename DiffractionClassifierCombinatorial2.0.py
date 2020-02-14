@@ -29,7 +29,7 @@ SERVER_INFO = "server_gen2.json"
 
 # list of three, one per level
 prediction_per_level = [1, 1, 2]
-num_peaks = [5, 9]
+num_peaks = [5, 8]
 
 
 def build_parser():
