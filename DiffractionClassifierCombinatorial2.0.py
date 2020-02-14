@@ -27,7 +27,7 @@ DEFAULT_USER = "user_profile.json"
 SERVER_INFO = "server_gen2.json"
 
 # list of three, one per level
-prediction_per_level = [1, 2, 2]
+prediction_per_level = [1, 1, 2]
 num_peaks = [7, 10]
 
 
@@ -75,6 +75,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     guesses = {}
     for k in range(1,tot_spec+1):
         guesses["species_"+str(k)]=[]
+        guesses["spec_confidence_"+str(k)]=[]
 #    print(guesses)
     common_peaks = []
     failed_combos = valid_peaks_combinations
@@ -90,31 +91,25 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
                 classificated = ClientSide2.Send_For_Classification(combo, chem_vec, mode, crystal_family, user_info, URL, prediction_per_level)
                 print(classificated)
                 classificated["file_name"] = temp_name
-#                print('name =')
-#                print(temp_name)
+    #                print('name =')
+    #                print(temp_name)
                 print(os.path.join(outpath,temp_name))
                 cf.write_to_csv(os.path.join(outpath,temp_name) + ".csv", classificated, prediction_per_level)
                 print(tot_spec)
                 for k in range(1,tot_spec+1):
-#                    print(k)
-#                    print(guesses['species_'+str(k)])
-#                    print(classificated["species_"+str(k)])
+    #                    print(k)
+    #                    print(guesses['species_'+str(k)])
+    #                    print(classificated["species_"+str(k)])
+                    print("-------confidence___________")
+                    print(classificated["spec_confidence_"+str(k)])
+                    print(guesses)
                     guesses['species_'+str(k)].append( classificated["species_"+str(k)] )
+                    guesses['spec_confidence_'+str(k)].append( classificated["spec_confidence_"+str(k)] )
                     common_peaks.append(classificated["species_"+str(k)])
                     
-#                guesses['species_2'].append(classificated["species_2"])
-#                guesses['species_3'].append(classificated["species_3"])
-#                guesses['species_4'].append(classificated["species_4"])
-            
-#                common_peaks.append(classificated["species_2"])
-#                common_peaks.append(classificated["species_3"])
-#                common_peaks.append(classificated["species_4"])
+                    
                 
                 # remove the classified combination
-#                print('guesses=')
-#                print(guesses)
-#                print('common_peaks=')
-#                print(common_peaks)
                 failed_combos.remove(combo)
                 
             except KeyboardInterrupt:
@@ -173,11 +168,11 @@ def make_figures(guesses,crystal_family,froot):
     prev_histograms_2 = []
     plots_1 = []
     plots_2 = []
-    #        print('guesses = ')
-    #        print(guesses)
+    print('guesses = ')
+    print(guesses)
     num_pred = np.prod(prediction_per_level)
     for rank in range(1,num_pred+1):
-        histo = np.histogram([g for g in guesses["species_{}".format(rank)]], bins = range(min(fam_range), max(fam_range)+1))
+        histo = np.histogram([g for g in guesses["species_{}".format(rank)]], weights = [g for g in guesses["spec_confidence_{}".format(rank)]], bins = np.arange(min(fam_range)-0.5, max(fam_range)+1.5))
         histo_log = np.array([np.log10(float(h))+1 if h>0 else 0 for h in histo[0]])
 #        print('log_histo = ')
 #        print(histo_log.tolist())
@@ -406,6 +401,9 @@ def main():
             
             
             common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, froot, crystal_family, user_info, url, prediction_per_level, subset, num_peaks)
+            
+            print("--------")
+            print(guesses)
         
             # save data
             with open(outfile, 'w') as fp:
