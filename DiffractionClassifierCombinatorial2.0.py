@@ -95,8 +95,6 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     #                print(temp_name)
                 print(os.path.join(outpath,temp_name))
                 cf.write_to_csv(os.path.join(outpath,temp_name) + ".csv", classificated, prediction_per_level)
-                print("------")
-                print(classificated)
                 print(tot_spec)
                 for k in range(1,tot_spec+1):
                     print(guesses)
