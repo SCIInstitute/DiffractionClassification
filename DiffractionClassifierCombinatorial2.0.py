@@ -84,8 +84,14 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     persistance = 0
     LIMIT = 3
 #    print(failed_combos)
+    
+    
+    if subset >0 and subset<len(failed_combos):
+        failed_combos = random.sample(failed_combos, subset)
+        print("using ", len(failed_combos)," peak combinations")
+        
     while len(failed_combos) > 0 and persistance < LIMIT:
-        for combo in random.sample(failed_combos, subset):
+        for combo in failed_combos:
             try:
 #                print('---classifying---')
 #                print(combo)
