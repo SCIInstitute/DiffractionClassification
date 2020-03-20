@@ -373,7 +373,7 @@ def main():
             [outroot, ext] = os.path.splitext(output_file)
             if not ext=='.json':
                 output_file = outroot+'.json'
-                output_fil_2e = outroot+'_peaks.json'
+                output_file_2 = outroot+'_peaks.json'
             outfile = 'Results/'+output_file
             outfile_2 = 'Results/'+output_file_2
 
