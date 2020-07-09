@@ -4,11 +4,13 @@ from __future__ import division
 import numpy as np
 from matplotlib import pyplot as plt
 
-def vote_peaks(signal, filter_size=10,passes=2,threshold=.6):
+def vote_peaks(signal, **kwargs):
     """
         Input: 
 
-        signal : list, contains d_spacings in the profile 
+        signal : list, contains d_spacings in the profile
+        
+        **kwargs:
 
         filter_size : int, starting bin width of each pass
         
@@ -21,7 +23,10 @@ def vote_peaks(signal, filter_size=10,passes=2,threshold=.6):
         payload : dictionary, contains classification statistics and predictions
     
     """
-
+    filter_size = kwargs.get('filter_size',10)
+    passes = kwargs.get('passes',2)
+    threshold = kwargs.get('peak_threshold',.6)
+    
 	# determine size of filter
     size = len(signal)
     
@@ -53,7 +58,7 @@ def vote_peaks(signal, filter_size=10,passes=2,threshold=.6):
 
 
 
-def plot_peaks(signal,scale,votes):
+def plot_peaks(signal,scale,votes,thresh = 0, **kwargs):
 
     """
     Inputs:
@@ -67,9 +72,12 @@ def plot_peaks(signal,scale,votes):
         None
         
     """
+    
+    scale_range = kwargs.get('dspace_range',[0.5, 6])
 
-    indicies = np.where(votes>0)
-    plt.figure(figsize=(6,2))
+    indicies = np.where(votes>thresh)
+    plt.figure(1,figsize=(6,2))
+    plt.cla()
     plt.ion()
     plt.plot(scale,signal,linewidth=3)
     
@@ -85,7 +93,7 @@ def plot_peaks(signal,scale,votes):
         counter += 1 
         peaks_h.append(line)
 
-    plt.xlim(.5,6)
+    plt.xlim(scale_range[0],scale_range[1])
     plt.xlabel("d spacing")
     plt.ylabel("intensity")
     

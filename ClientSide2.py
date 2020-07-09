@@ -49,7 +49,7 @@ def Load_Profile(path,get_metadata=False):
 
     return profile,scale
 
-def Find_Peaks(profile, scale, max_numpeaks=75):
+def Find_Peaks(profile, scale, **kwargs):
     """
     Pulls out the peaks from a radial profile
 
@@ -72,38 +72,59 @@ def Find_Peaks(profile, scale, max_numpeaks=75):
                             peaks locations found in the profile
     
     """
-
-    squished_scale = [True if x<6 and x >.5 else False for x in scale]
-
-    filter_size=max(int(scale[squished_scale].shape[0]/50),3)
     
+    
+    max_numpeaks = kwargs.get('max_numpeaks', 75)
+    scale_range = kwargs.get('dspace_range',[0.5, 6])
+    
+    squished_scale = [True if x<scale_range[1] and x >scale_range[0] else False for x in scale]
+
+    print(squished_scale)
+    
+    
+    filter_size_default=max(int(scale[squished_scale].shape[0]/50),3)
+    print(filter_size_default)
+    kwargs['filter_size'] = kwargs.get('filter_size',filter_size_default)
+    print('filter size')
+    print(kwargs['filter_size'])
     # find the location of the peaks in pixel space    
-    peaks = pfnd.vote_peaks(profile[squished_scale],filter_size=filter_size)
+    peaks = pfnd.vote_peaks(profile[squished_scale], **kwargs)
     
     peaks_d = scale[squished_scale][peaks>0]
     scale_d = scale
     thresh = 0
-    
-    if len(peaks_d) > max_numpeaks :
+    orig_length = len(peaks_d)
+
+    if len(peaks_d) > max_numpeaks:
         print(len(peaks_d))
         print("WARNING: {} peaks were detected," +
         " some of the peaks will be trimmed."+
         "\nFor best results. Please check calibration or run manual peak detection.".format(len(peaks_d)))
         srt_peaks = np.sort(peaks[peaks>0])
         thresh = srt_peaks[len(peaks_d)-max_numpeaks]
+        if len(scale[squished_scale][peaks>thresh]) ==0 and thresh>0:
+            thresh -=1
         peaks_d = scale[squished_scale][peaks>thresh]
         print(len(peaks_d))
+        print(thresh)
+        print(srt_peaks)
         
+        if len(peaks_d) == orig_length:
+            print("WARNING:  reduction based on votes unsuccessful. try other parameters")
+        elif len(peaks_d)> max_numpeaks:
+            print("WARNING:  partial reduction to {} peaks.".format(len(peaks_d)))
         
    
     peak_locs = {"d_spacing":scale[squished_scale][peaks>thresh],
                 "vec":[int(round((x-.5)*164))-1 for x in peaks_d]
         }
+        
+        
 
     # Display the data
-    peaks_h = pfnd.plot_peaks(profile[squished_scale],scale[squished_scale],peaks)
+    peaks_h = pfnd.plot_peaks(profile[squished_scale], scale[squished_scale], peaks, thresh, **kwargs)
 
-    if len(peak_locs['vec']) <= 2:
+    if len(peak_locs['vec']) <= 4:
         print("WARNING: only {} peaks were detected," + 
             " this is lower than the recommended 4+ peaks needed"+
             "\nFor best results. Please check calibration.".format(len(peaks_d)))
@@ -255,6 +276,8 @@ def Classify_Family(payload, user_info, URL, weight, pred_number):
         
     # Once the family is known, predicts the genus
 #    print(requests.post(URL+"predict", json=payload,timeout=30))
+    print("----")
+    print(payload)
     genus = requests.post(URL+"predict", json=payload,timeout=30).json()
 
     print("---genus---")

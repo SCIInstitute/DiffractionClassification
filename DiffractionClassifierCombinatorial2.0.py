@@ -29,7 +29,14 @@ SERVER_INFO = "server_gen2.json"
 
 # list of three, one per level
 prediction_per_level = [1, 1, 2]
-num_peaks = [5, 8]
+num_peaks = [1, 5]
+
+FILTER_SETTINGS = { "max_numpeaks": 20,
+                    "dspace_range" : [0.1,6],
+                    "peak_threshold": 1,
+                    "filter_size" : 15,
+                    "passes" : 2
+                    }
 
 
 def build_parser():
@@ -73,7 +80,7 @@ def combination_peaks(peak_batch, chem_vec, mode, temp_name, crystal_family, use
     tot_spec = 1
     for p in prediction_per_level:
         tot_spec *= p
-    guesses = {}
+    guesses = {"num_pred": tot_spec}
     for k in range(1,tot_spec+1):
         guesses["species_"+str(k)]=[]
         guesses["spec_confidence_"+str(k)]=[]
@@ -243,8 +250,8 @@ def make_figures(guesses,crystal_family,froot):
     ax2.set_thetagrids([f*thet for f in fam_axes],labels = FAMILIES)
     plt.legend(plots_2,leg_list)
     #        plt.legend(plots,("species_1","species_2","species_3","species_4"))
-    print("Results/"+froot+"_gen2_polar.png")
-    plt.savefig("Results/"+froot+"_gen2_polar.png",dpi = 300)
+#    print("Results/"+froot+"_gen2_polar.png")
+#    plt.savefig("Results/"+froot+"_gen2_polar.png",dpi = 300)
 #    plt.show()
     
 
@@ -339,7 +346,8 @@ def main():
         file_paths = []
         for dirpath,dirnames,fpath in os.walk(file_path):
             for path in fpath:
-                file_paths.append(os.path.join(dirpath,path))
+                if not path[0] == '.':
+                    file_paths.append(os.path.join(dirpath,path))
         print("found {} files to load.".format(len(file_paths)))
 
     else:
@@ -384,7 +392,7 @@ def main():
                 guesses = json.load(fp)
         else:
             if diffraction:
-                peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale,25)
+                peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data, scale, **FILTER_SETTINGS)
                 # Choose which peaks to classify on
                 if manual_peak_selection:
                     peak_locs = cf.choose_peaks(peak_locs,peaks_h)
@@ -406,6 +414,12 @@ def main():
             
             
             common_peaks,guesses = combination_peaks(peak_locs, chem_vec, mode, froot, crystal_family, user_info, url, prediction_per_level, subset, num_peaks)
+#            print("--- peak_locs ---")
+#            print(peak_locs)
+            guesses["pk_d_spacing"] = peak_locs["d_spacing"].tolist()
+            guesses["pk_vec"] = peak_locs["vec"]
+            
+            print(guesses)
         
             # save data
             with open(outfile, 'w') as fp:

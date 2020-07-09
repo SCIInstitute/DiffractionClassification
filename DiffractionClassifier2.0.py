@@ -23,6 +23,13 @@ SERVER_INFO = "server_gen2.json"
 # list of three, one per level
 prediction_per_level = [2, 3, 3]
 
+FILTER_SETTINGS = { "max_numpeaks": 20,
+                    "dspace_range" : [0.1,6],
+                    "peak_threshold": 1,
+                    "filter_size" : 15,
+                    "passes" : 2
+                    }
+
 
 def build_parser():
     parser = argparse.ArgumentParser()
@@ -102,6 +109,7 @@ def main():
         raise ValueError('you need to have the server URL provided to you')
     
     chem_vec = cf.check_for_chemistry(session)
+    
         
     
     # Determine if the path is a directory or a file
@@ -110,7 +118,8 @@ def main():
         file_paths = []
         for dirpath,dirnames,fpath in os.walk(file_path):
             for path in fpath:
-                file_paths.append(os.path.join(dirpath,path))
+                if not path[0] == '.':
+                    file_paths.append(os.path.join(dirpath,path))
         print("found {} files to load.".format(len(file_paths)))
 
     else:
@@ -129,7 +138,8 @@ def main():
         print("length",len(image_data))
         print("max",np.max(image_data))
         if diffraction:
-            peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale)
+            
+            peak_locs,peaks_h = ClientSide2.Find_Peaks(image_data,scale, **FILTER_SETTINGS)
             # Choose which peaks to classify on
             if manual_peak_selection:
                 peak_locs = cf.choose_peaks(peak_locs,peaks_h)

@@ -19,6 +19,10 @@ def choose_peaks(peaks,peak_h):
     plt.title('select peaks.  Enter to stop.')
     
     raw_choices = []
+    
+    ax = plt.gca()
+    if ax.figure.canvas.manager not in plt._pylab_helpers.Gcf.figs.values():
+        raise ValueError('Window closed')
     while True:
         pts = []
         pts = plt.ginput(100, timeout=-1)
@@ -27,8 +31,11 @@ def choose_peaks(peaks,peak_h):
         print(len(pts))
         
         index = []
+        print(pts)
         for p in pts:
             index.append(np.argmin(np.abs(d['d_spacing']-p[0])))
+#        else:
+#            index = [*range(0,maximum)]
         
         index.sort()
     
@@ -36,6 +43,9 @@ def choose_peaks(peaks,peak_h):
         
         for i in index:
             peak_h[i][0].set_linewidth(5)
+            
+        if ax.figure.canvas.manager not in plt._pylab_helpers.Gcf.figs.values():
+            raise ValueError('Window closed')
       
       
         plt.title('Enter to keep peaks, or reselect points')
