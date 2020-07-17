@@ -20,6 +20,10 @@ Advanced usage:
 	Similarly you specify the calibration by modifying the calibration.json file and adding --calibration calibration.json to the 
 	function call.
 
+### Acknowledgements
+
+Work supported through the INL Laboratory Directed Research& Development (LDRD) Program under DOE Idaho Operations Office Contract DE-AC07-05ID145142. Thanks to Ian Harvey for many useful discussions and contributions to this work.
+
 
 ### Citations
 
