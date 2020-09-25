@@ -32,9 +32,9 @@ prediction_per_level = [1, 1, 2]
 num_peaks = [1, 5]
 
 FILTER_SETTINGS = { "max_numpeaks": 20,
-                    "dspace_range" : [0.1,6],
+                    "dspace_range" : [0.1,3],
                     "peak_threshold": 1,
-                    "filter_size" : 15,
+                    "filter_size" : 10,
                     "passes" : 2
                     }
 
