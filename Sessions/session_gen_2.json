@@ -10,5 +10,10 @@
 "user_info":"user_profile.json",
 "display_type":"both",
 "scale_bar":"d",
-"server_info":"server_gen2.json"
+"server_info":"server_gen2.json",
+"filter_settings": {"max_numpeaks": 20,
+    "dspace_range" : [0.9,4],
+    "peak_threshold": 0.5,
+    "filter_size" : 250,
+    "passes" : 2}
 }

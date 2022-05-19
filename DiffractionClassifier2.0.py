@@ -1,4 +1,5 @@
 import ClientSide2 #custom package
+import logging
 
 import numpy as np
 import argparse
@@ -23,7 +24,7 @@ SERVER_INFO = "server_gen2.json"
 # list of three, one per level
 prediction_per_level = [2, 3, 3]
 
-FILTER_SETTINGS = { "max_numpeaks": 20,
+DEFAULT_FILTER_SETTINGS = { "max_numpeaks": 20,
                     "dspace_range" : [0.1,6],
                     "peak_threshold": 1,
                     "filter_size" : 15,
@@ -91,6 +92,14 @@ def main():
         prediction_per_level[0] = 1
     else:
         crystal_family = None
+        
+        
+    if session["filter_settings"]:
+        FILTER_SETTINGS = session["filter_settings"]
+    else:
+        FILTER_SETTINGS = {}
+        
+    print(FILTER_SETTINGS)
     
     # Load user from provided path, [IN PROGRESS]
     if session["user_info"]:

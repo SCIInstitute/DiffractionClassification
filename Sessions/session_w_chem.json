@@ -1,4 +1,4 @@
-{"file_path":"Data/profile_test",
+{"file_path":"Data/profile_test/04_Cs_summed.csv",
 "auto_calibrate":"calibration.json",
 "diffraction":true,
 "chemistry":true,
@@ -10,8 +10,8 @@
 "user_info":"user_profile.json",
 "display_type":"both",
 "scale_bar":"d",
-"chemical_formula":"Ce2O3",
-"chemical_contents":["Ce","O"],
+"chemical_formula":"Cs2O3",
+"chemical_contents":["Cs","O"],
 "atomic_percentage":[[58,0.4],[8,0.6]],
 "atomic_density":[[58,0.854],[8,0.146]],
 "server_info":"server_gen2.json"

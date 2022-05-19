@@ -47,15 +47,86 @@ def vote_peaks(signal, **kwargs):
     # Pare down the votes to remove extraneous peaks but preserve candidates
     votes[votes<np.amax(votes)*threshold] = 0        
 
-
+    print('___-____-_-__-_ votes ___-_--_-_--_---_')
+#    print(votes.tolist())
+    print(np.amax(votes))
+    histo = np.histogram(votes,bins = 256)
+    bar_string = print_histogram(votes,title = 'votes',mode = 'log')
+    print(bar_string)
 
     # trim off the padding from the votes array
     inner = filter_size
     peak_locs_pixel = votes[inner:-inner]
 
     return peak_locs_pixel
+    
+def print_histogram(array, title = "", mode = 'linear'):
+        y_res = 10
+        nbins = int(np.min((128,np.amax(array))))
+        histo = np.histogram(array,bins = nbins)
+        y_tick = ['       ']*y_res
+        
+                    
+        if mode == 'linear':
+            y_hist = (histo[0]/np.max(histo[0])*y_res).astype(int)
+            
+            y_tick[0] = "%7.3g" % np.max(histo[0])
+            y_tick[int(y_res/2)] = "%7.3g" % (np.max(histo[0])* (int(y_res/2)/y_res))
+            y_tick[y_res-1] = "%7.3g" % 0
+        elif mode == 'log':
+            log_y = np.log10(histo[0])/np.log10(np.max(histo[0]))
+            log_y[log_y<0] = -1/(y_res-1)
+            y_hist = (log_y*(y_res-1)).astype(int)+1
+            
+            y_tick[0] = "10^%4.3g" % np.max(np.log10(np.max(histo[0])))
+            y_tick[int((y_res-1)/2)] = "10^%4.3g" % (np.max(np.log10(np.max(histo[0])))* (int((y_res-1)/2)/(y_res-1)))
+            y_tick[y_res-2] = "10^%4.3g" % 0
+        elif mode == 'skip_0':
+            histo = (histo[0][1:],histo[1][1:])
+            y_hist = (histo[0]/np.max(histo[0])*y_res).astype(int)
+            
+            y_tick[0] = "%7.3g" % np.max(histo[0])
+            y_tick[int(y_res/2)] = "%7.3g" % (np.max(histo[0])* (int(y_res/2)/y_res))
+            y_tick[y_res-1] = "%7.3g" % 0
+        elif mode == 'ignore_0':
+            y_hist = (histo[0]/np.max(histo[0][1:])*y_res).astype(int)
+            y_hist[y_hist>y_res] = y_res
+            
+            y_tick[0] = "%7.3g" % np.max(histo[0][1:])
+            y_tick[int(y_res/2)] = "%7.3g" % (np.max(histo[0][1:])* (int(y_res/2)/y_res))
+            y_tick[y_res-1] = "%7.3g" % 0
+        else:
+            raise ValueError("print_histogram: mode not recognized")
+            
+        
+        spacer = '        '
+        l_sp = len(spacer)-1
+        x_tick = ' '
+        x_tick += "%7.3g" % histo[1][0]
+        h1 = int(len(y_hist)/4)
+        h2 = int(len(y_hist)/2)
+        h3 = int(3*len(y_hist)/4)
+        x_tick+=' '*(h1-l_sp)
+        x_tick+= "%7.3g" % (histo[1][-1] * h1/len(y_hist))
+        x_tick+=' '*(h2-h1-l_sp)
+        x_tick+= "%7.3g" % (histo[1][-1] * h2/len(y_hist))
+        x_tick+=' '*(h3-h2-l_sp)
+        x_tick+= "%7.3g" % (histo[1][-1] * h3/len(y_hist))
+        x_tick+=' '*(len(y_hist)-h3-l_sp)
+        x_tick+= "%7.3g" % (histo[1][-1])
+        
+        bar_string = spacer+title+'\n'
+        for l in range(y_res,0,-1):
+            string = ['%' if y>=l else ' ' for y in y_hist]
+            string = ''.join(string)
+            bar_string += y_tick[y_res-l]+'|'+string+'\n'
+            
 
+        bar_string+= spacer + '-'*len(y_hist) +'\n'
+        bar_string+= x_tick
+        
 
+        return bar_string
 
 
 def plot_peaks(signal,scale,votes,thresh = 0, **kwargs):
@@ -96,10 +167,7 @@ def plot_peaks(signal,scale,votes,thresh = 0, **kwargs):
     plt.xlim(scale_range[0],scale_range[1])
     plt.xlabel("d spacing")
     plt.ylabel("intensity")
-    
 
-    #plt.legend()
-#    plt.show()
     
     return peaks_h
     

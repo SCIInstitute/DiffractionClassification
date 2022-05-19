@@ -6,6 +6,7 @@ import json
 import os
 import ClassifierFunctions2 as cf
 import random
+import logging
 
 from matplotlib import pyplot as plt
 from builtins import input
@@ -31,10 +32,10 @@ SERVER_INFO = "server_gen2.json"
 prediction_per_level = [1, 1, 2]
 num_peaks = [1, 5]
 
-FILTER_SETTINGS = { "max_numpeaks": 20,
-                    "dspace_range" : [0.1,3],
-                    "peak_threshold": 1,
-                    "filter_size" : 10,
+DEFAULT_FILTER_SETTINGS = { "max_numpeaks": 75,
+                    "dspace_range" : [0.5,6],
+                    "peak_threshold": 0.7,
+                    "filter_size" : 15,
                     "passes" : 2
                     }
 
